@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#232f3e">
+    <title>FlexRunner</title>
+
+```
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+
+<style>
+    :root {
+        --safe-top: env(safe-area-inset-top);
+        --safe-bottom: env(safe-area-inset-bottom);
+        --safe-left: env(safe-area-inset-left);
+        --safe-right: env(safe-area-inset-right);
+        --amazon-orange: #ff9900;
+        --amazon-dark: #232f3e;
+        --amazon-darker: #131921;
+        --amazon-light: #37475a;
+        --radius: 12px;
+    }
+
+    .light {
+        --bg-primary: #f0f2f5;
+        --bg-secondary: #ffffff;
+        --text-primary: #1f2937;
+        --text-secondary: #6b7280;
+        --border-color: #e5e7eb;
+    }
+    
+    .dark {
+        --bg-primary: #131921;
+        --bg-secondary: #232f3e;
+        --text-primary: #ffffff;
+        --text-secondary: #a0aec0;
+        --border-color: #37475a;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+    html { height: 100%; }
+    body { 
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+        background: var(--bg-primary);
+        min-height: 100%;
+        padding-top: var(--safe-top);
+        padding-left: var(--safe-left);
+        padding-right: var(--safe-right);
+        color: var(--text-primary);
+    }
+    
+    .app { min-height: 100vh; display: flex; flex-direction: column; }
+    
+    .header {
+        padding: 0.75rem 1rem;
+        background: linear-gradient(180deg, #232f3e 0%, #1a242f 100%);
+        border-bottom: 3px solid var(--amazon-orange);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+    }
+    
+    .header-row { display: flex; justify-content: space-between; align-items: center; }
+    .logo { display: flex; align-items: center; gap: 0.5rem; }
+    .logo-icon { font-size: 1.5rem; }
+    .logo-text { font-size: 1.25rem; font-weight: 800; color: white; }
+    .logo-text span { color: var(--amazon-orange); }
+    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .header-stat { font-size: 0.75rem; font-weight: 700; color: white; background: var(--amazon-orange); padding: 0.375rem 0.75rem; border-radius: 4px; }
+    
+    .icon-btn {
+        width: 36px; height: 36px; border-radius: 6px; border: none;
+        background: var(--amazon-light); color: white; font-size: 1rem;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .icon-btn:active { transform: scale(0.95); background: var(--amazon-orange); }
+    
+    .content {
+        flex: 1; padding: 1rem;
+        padding-bottom: calc(130px + var(--safe-bottom));
+        overflow-y: auto; -webkit-overflow-scrolling: touch;
+    }
+    
+    .range-selector { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .range-btn {
+        flex: 1; padding: 0.625rem; border: 2px solid var(--border-color);
+        border-radius: 6px; background: var(--bg-secondary);
+        font-size: 0.875rem; font-weight: 700; color: var(--text-secondary); cursor: pointer;
+    }
+    .range-btn:active { transform: scale(0.97); }
+    .range-btn.active { background: var(--amazon-orange); border-color: var(--amazon-orange); color: var(--amazon-darker); }
+    
+    .number-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.4rem; margin-bottom: 1.25rem; }
+    
+    .sticker {
+        aspect-ratio: 1; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        background: linear-gradient(145deg, #fcd34d, #f59e0b);
+        border: 3px solid rgba(0,0,0,0.1);
+        border-radius: 8px;
+        font-size: 1.25rem; 
+        font-weight: 900; 
+        color: #1f2937;
+        cursor: pointer; 
+        box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    
+    .sticker:active { transform: scale(0.95); }
+    
+    .sticker.selected {
+        transform: scale(1.08);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        border-color: #1f2937;
+        background: linear-gradient(145deg, #1f2937, #374151);
+        color: white;
+    }
+    
+    /* Just scanned animation */
+    .sticker.just-scanned {
+        animation: scannedPulse 0.5s ease;
+    }
+    @keyframes scannedPulse {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+        50% { transform: scale(1.15); box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); }
+        100% { transform: scale(1.08); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+    }
+    
+    .all-assigned {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: var(--text-secondary);
+    }
+    .all-assigned-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+    .all-assigned-text { font-size: 1rem; font-weight: 600; }
+    
+    .car-container {
+        background: var(--bg-secondary); border-radius: var(--radius);
+        padding: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border: 1px solid var(--border-color);
+    }
+    .car-label { text-align: center; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.75rem; }
+    .car-label strong { color: var(--amazon-orange); }
+    .car-visual { position: relative; width: 100%; max-width: 300px; margin: 0 auto; aspect-ratio: 180/320; }
+    .car-svg { width: 100%; height: 100%; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.25)); }
+    
+    .zone-btn {
+        position: absolute; border: none; border-radius: 4px; font-weight: 800;
+        cursor: pointer; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; color: #1f2937;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+        background: linear-gradient(145deg, #fcd34d, #f59e0b);
+        transition: all 0.2s ease;
+    }
+    .zone-btn:active { transform: scale(0.95); }
+    .zone-btn .count {
+        font-size: 1.375rem; line-height: 1; background: #1f2937; color: white;
+        padding: 0.125rem 0.375rem; border-radius: 2px; min-width: 28px;
+    }
+    .zone-btn .label { font-size: 0.5rem; opacity: 0.8; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+    
+    .zone-passenger { top: 11%; right: 12%; width: 35%; height: 13%; }
+    .zone-passenger .count { background: #2563eb; }
+    .zone-backleft { top: 32%; left: 12%; width: 24%; height: 14%; }
+    .zone-backleft .count { background: #16a34a; }
+    .zone-backmid { top: 32%; left: 50%; transform: translateX(-50%); width: 24%; height: 14%; }
+    .zone-backmid .count { background: #9333ea; }
+    .zone-backright { top: 32%; right: 12%; width: 24%; height: 14%; }
+    .zone-backright .count { background: #d97706; }
+    .zone-trunk { bottom: 10%; left: 50%; transform: translateX(-50%); width: 70%; height: 20%; }
+    .zone-trunk .count { background: #db2777; }
+    
+    .zone-btn.disabled { opacity: 0.4; box-shadow: none; }
+    .zone-btn.pulse { animation: zonePulse 1s ease-in-out infinite; }
+    @keyframes zonePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+    .zone-backmid.pulse { animation: zonePulseMid 1s ease-in-out infinite; }
+    @keyframes zonePulseMid { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.03); } }
+    .zone-trunk.pulse { animation: zonePulseTrunk 1s ease-in-out infinite; }
+    @keyframes zonePulseTrunk { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.03); } }
+    
+    .bottom-bar {
+        position: fixed; bottom: 0; left: 0; right: 0;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(180deg, #232f3e 0%, #1a242f 100%);
+        border-top: 3px solid var(--amazon-orange);
+        padding-bottom: calc(0.75rem + var(--safe-bottom));
+        z-index: 50;
+    }
+    .selection-info { text-align: center; font-size: 0.8125rem; color: #a0aec0; margin-bottom: 0.5rem; }
+    .selection-info strong { color: var(--amazon-orange); font-weight: 700; }
+    .btn-row { display: flex; gap: 0.5rem; }
+    
+    .btn {
+        flex: 1; padding: 0.875rem; border: none; border-radius: 8px;
+        font-size: 0.9375rem; font-weight: 700; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 0.375rem;
+        transition: all 0.15s ease;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: linear-gradient(180deg, var(--amazon-orange), #e68a00); color: #232f3e; box-shadow: 0 4px 12px rgba(255, 153, 0, 0.3); }
+    .btn-secondary { background: var(--amazon-light); color: white; }
+    .btn-scan { background: linear-gradient(180deg, #22c55e, #16a34a); color: white; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); }
+    .btn-ghost { background: transparent; color: #a0aec0; }
+    .btn-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-small { padding: 0.625rem 1rem; font-size: 0.875rem; flex: 0; }
+    
+    /* Scanner Modal */
+    .scanner-overlay {
+        position: fixed; inset: 0; background: #000;
+        z-index: 200; display: none; flex-direction: column;
+    }
+    .scanner-overlay.active { display: flex; }
+    
+    .scanner-header {
+        padding: 1rem;
+        padding-top: calc(1rem + var(--safe-top));
+        background: rgba(0,0,0,0.8);
+        display: flex; justify-content: space-between; align-items: center;
+        position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+    }
+    .scanner-title { color: white; font-weight: 700; font-size: 1.125rem; }
+    .scanner-close {
+        background: rgba(255,255,255,0.2); border: none; color: white;
+        width: 40px; height: 40px; border-radius: 50%; font-size: 1.25rem;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    
+    .scanner-video-container {
+        flex: 1; display: flex; align-items: center; justify-content: center;
+        overflow: hidden; position: relative;
+    }
+    #scannerVideo {
+        width: 100%; height: 100%; object-fit: cover;
+    }
+    
+    .scanner-overlay-ui {
+        position: absolute; inset: 0; pointer-events: none;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    
+    .scan-frame {
+        width: 280px; height: 180px;
+        border: 3px solid var(--amazon-orange);
+        border-radius: 12px;
+        position: relative;
+        box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+    }
+    .scan-frame::before {
+        content: '';
+        position: absolute;
+        top: 50%; left: 10%; right: 10%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #22c55e, transparent);
+        animation: scanLine 2s ease-in-out infinite;
+    }
+    @keyframes scanLine {
+        0%, 100% { top: 20%; opacity: 0.5; }
+        50% { top: 80%; opacity: 1; }
+    }
+    
+    .scan-hint {
+        color: white; text-align: center;
+        margin-top: 1.5rem; font-size: 0.9375rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
+    
+    .scan-status {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        padding: 1.5rem;
+        padding-bottom: calc(1.5rem + var(--safe-bottom));
+        background: rgba(0,0,0,0.8);
+        text-align: center;
+    }
+    .scan-status-text {
+        color: white; font-size: 1rem; font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+    .scan-status-text.found { color: #22c55e; }
+    .scan-status-text.searching { color: #a0aec0; }
+    .scan-status-text.error { color: #f87171; }
+    
+    .scanned-numbers {
+        display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;
+        margin-top: 0.75rem;
+    }
+    .scanned-chip {
+        background: linear-gradient(145deg, #22c55e, #16a34a);
+        color: white; padding: 0.375rem 0.75rem;
+        border-radius: 6px; font-weight: 800; font-size: 1rem;
+    }
+    
+    .loading-spinner {
+        width: 24px; height: 24px;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        display: inline-block; vertical-align: middle;
+        margin-right: 0.5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* Other modals */
+    .modal-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 100; padding: 1rem; opacity: 0; visibility: hidden; transition: all 0.2s ease;
+    }
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+    .modal {
+        background: var(--bg-secondary); border-radius: var(--radius);
+        width: 100%; max-width: 380px; max-height: 85vh; overflow: hidden;
+        transform: scale(0.9) translateY(20px); transition: transform 0.25s ease;
+        border: 1px solid var(--border-color);
+    }
+    .modal-overlay.active .modal { transform: scale(1) translateY(0); }
+    .modal-header {
+        padding: 1rem 1.25rem;
+        background: linear-gradient(180deg, #232f3e 0%, #1a242f 100%);
+        border-bottom: 2px solid var(--amazon-orange);
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-title { font-size: 1.125rem; font-weight: 700; color: white; }
+    .modal-close {
+        background: var(--amazon-light); border: none; font-size: 1rem; color: white;
+        cursor: pointer; width: 32px; height: 32px; border-radius: 6px;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .modal-body { padding: 1rem 1.25rem; max-height: 65vh; overflow-y: auto; background: var(--bg-primary); }
+    .zone-section { margin-bottom: 1rem; }
+    .zone-header {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 0.625rem 0.875rem; border-radius: 6px; margin-bottom: 0.5rem;
+        font-weight: 700; font-size: 0.875rem;
+        background: linear-gradient(145deg, #fcd34d, #f59e0b); color: #1f2937;
+    }
+    .zone-header .zone-count { background: #1f2937; color: white; padding: 0.125rem 0.5rem; border-radius: 3px; }
+    .zone-header.passenger .zone-count { background: #2563eb; }
+    .zone-header.backleft .zone-count { background: #16a34a; }
+    .zone-header.backmid .zone-count { background: #9333ea; }
+    .zone-header.backright .zone-count { background: #d97706; }
+    .zone-header.trunk .zone-count { background: #db2777; }
+    .package-list { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+    .package-chip {
+        background: linear-gradient(145deg, #fcd34d, #f59e0b);
+        padding: 0.5rem 0.625rem; border-radius: 6px;
+        font-size: 0.9375rem; font-weight: 800; color: #1f2937;
+        display: flex; align-items: center; gap: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .package-chip button { 
+        background: #1f2937; border: none; color: white; 
+        cursor: pointer; font-size: 0.75rem; padding: 0.125rem 0.375rem; 
+        border-radius: 3px; font-weight: 700;
+    }
+    .empty-zone { color: var(--text-secondary); font-size: 0.8125rem; font-style: italic; }
+    
+    .delivery-zone {
+        background: var(--bg-secondary); border-radius: var(--radius);
+        padding: 1rem; margin-bottom: 0.75rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 1px solid var(--border-color);
+    }
+    .delivery-zone-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 0.75rem; padding-bottom: 0.625rem; border-bottom: 3px solid var(--amazon-orange);
+    }
+    .delivery-zone-header.passenger { border-color: #3b82f6; }
+    .delivery-zone-header.backleft { border-color: #22c55e; }
+    .delivery-zone-header.backmid { border-color: #a855f7; }
+    .delivery-zone-header.backright { border-color: #f59e0b; }
+    .delivery-zone-header.trunk { border-color: #ec4899; }
+    .delivery-zone-title { font-weight: 700; font-size: 1rem; color: var(--text-primary); }
+    .delivery-zone-count { font-size: 0.8125rem; font-weight: 600; color: var(--text-secondary); }
+    .delivery-packages { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .delivery-chip {
+        background: linear-gradient(145deg, #fcd34d, #f59e0b);
+        padding: 0.75rem 1rem; border-radius: 6px;
+        font-size: 1.25rem; font-weight: 900; color: #1f2937;
+        cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        transition: all 0.15s ease; min-width: 52px; text-align: center;
+    }
+    .delivery-chip:active { transform: scale(0.95); }
+    .delivery-chip.delivered {
+        background: linear-gradient(145deg, #86efac, #4ade80);
+        color: #052e16; opacity: 0.6;
+    }
+    
+    .delivery-stats { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
+    .delivery-stat { flex: 1; text-align: center; padding: 1.25rem 1rem; border-radius: 10px; }
+    .delivery-stat.done { background: linear-gradient(145deg, #065f46, #047857); }
+    .delivery-stat.remaining { background: linear-gradient(145deg, #1e40af, #2563eb); }
+    .delivery-stat-value { font-size: 2.5rem; font-weight: 800; line-height: 1; color: white; }
+    .delivery-stat-label { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.375rem; color: rgba(255,255,255,0.8); }
+    
+    .celebration { text-align: center; padding: 3rem 1rem; }
+    .celebration-emoji { font-size: 5rem; animation: bounce 0.8s ease infinite; }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    .celebration-text { font-size: 1.75rem; font-weight: 800; color: var(--text-primary); margin-top: 1rem; }
+    .celebration-sub { font-size: 1rem; color: var(--amazon-orange); margin-top: 0.5rem; }
+    .swipe-hint { text-align: center; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 1rem; }
+    
+    .toast {
+        position: fixed; bottom: calc(140px + var(--safe-bottom)); left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: var(--amazon-dark); color: white;
+        padding: 0.75rem 1.25rem; border-radius: 8px;
+        font-size: 0.875rem; font-weight: 600; opacity: 0;
+        transition: all 0.3s ease; z-index: 200;
+        display: flex; align-items: center; gap: 0.75rem;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        border: 1px solid var(--amazon-orange);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast button {
+        background: var(--amazon-orange); border: none; color: #232f3e;
+        padding: 0.375rem 0.75rem; border-radius: 4px; font-weight: 700; font-size: 0.8125rem; cursor: pointer;
+    }
+</style>
+```
+
+</head>
+<body class="dark">
+    <div id="app"></div>
+    <div class="toast" id="toast"></div>
+
+```
+<!-- Scanner Overlay -->
+<div class="scanner-overlay" id="scannerOverlay">
+    <div class="scanner-header">
+        <span class="scanner-title">📷 Scan Driver Aid</span>
+        <div style="display:flex;gap:0.5rem;">
+            <button class="scanner-close" id="flashlightBtn" style="background:rgba(255,255,255,0.2);">🔦</button>
+            <button class="scanner-close" id="scannerClose">✕</button>
+        </div>
+    </div>
+    <div class="scanner-video-container">
+        <video id="scannerVideo" autoplay playsinline muted></video>
+        <canvas id="scannerCanvas" style="display:none;"></canvas>
+        <div class="scanner-overlay-ui">
+            <div class="scan-frame"></div>
+            <div class="scan-hint">Point at DRIVER AID sticker</div>
+        </div>
+    </div>
+    <div class="scan-status">
+        <div class="scan-status-text searching" id="scanStatusText">
+            <span class="loading-spinner"></span> Looking for DRIVER AID...
+        </div>
+        <div class="scanned-numbers" id="scannedNumbers"></div>
+        <button class="btn btn-primary" id="scanDoneBtn" style="margin-top:1rem;">Done Scanning</button>
+    </div>
+</div>
+
+<!-- Tesseract.js -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<script>
+    let packages = JSON.parse(localStorage.getItem('packages_v9') || '{}');
+    let delivered = JSON.parse(localStorage.getItem('delivered_v9') || '[]');
+    let selectedNumbers = [];
+    let view = 'assign';
+    let showSummary = false;
+    let darkMode = localStorage.getItem('darkMode_v9') !== 'false';
+    let packageRange = parseInt(localStorage.getItem('packageRange_v9') || '50');
+    let history = [];
+    
+    // Scanner state
+    let scannerActive = false;
+    let videoStream = null;
+    let scanInterval = null;
+    let tesseractWorker = null;
+    let isProcessing = false;
+    let scannedThisSession = [];
+    let flashlightOn = false;
+    let videoTrack = null;
+    
+    const zones = {
+        passenger: { name: 'Passenger Seat', class: 'passenger' },
+        backleft: { name: 'Back Left', class: 'backleft' },
+        backmid: { name: 'Back Middle', class: 'backmid' },
+        backright: { name: 'Back Right', class: 'backright' },
+        trunk: { name: 'Trunk', class: 'trunk' }
+    };
+    const ranges = [20, 35, 50];
+    
+    function applyDarkMode() {
+        document.body.classList.toggle('dark', darkMode);
+        document.body.classList.toggle('light', !darkMode);
+    }
+    applyDarkMode();
+    
+    function haptic(style = 'light') {
+        if ('vibrate' in navigator) {
+            const patterns = { light: [8], medium: [15], success: [8, 40, 8], scan: [50, 30, 50] };
+            navigator.vibrate(patterns[style] || [8]);
+        }
+    }
+    
+    function saveState() {
+        localStorage.setItem('packages_v9', JSON.stringify(packages));
+        localStorage.setItem('delivered_v9', JSON.stringify(delivered));
+        localStorage.setItem('darkMode_v9', darkMode);
+        localStorage.setItem('packageRange_v9', packageRange);
+    }
+    
+    function showToast(message, showUndo = false) {
+        const toast = document.getElementById('toast');
+        toast.innerHTML = showUndo ? `${message} <button onclick="undoLast()">Undo</button>` : message;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    
+    function undoLast() {
+        if (history.length === 0) return;
+        const last = history.pop();
+        if (last.type === 'assign') {
+            last.numbers.forEach((num, i) => {
+                if (last.prevZones[i]) packages[num] = last.prevZones[i];
+                else delete packages[num];
+            });
+        } else if (last.type === 'remove') {
+            packages[last.number] = last.zone;
+        } else if (last.type === 'deliver') {
+            delivered = delivered.filter(n => n !== last.number);
+        } else if (last.type === 'undeliver') {
+            delivered.push(last.number);
+        }
+        haptic('medium');
+        render();
+        document.getElementById('toast').classList.remove('show');
+    }
+    
+    function getZoneCount(zoneKey) {
+        return Object.entries(packages).filter(([num, zone]) => zone === zoneKey && !delivered.includes(num)).length;
+    }
+    
+    function getTotalAssigned() {
+        return Object.keys(packages).filter(num => !delivered.includes(num)).length;
+    }
+    
+    function getUnassignedNumbers() {
+        return Array.from({length: packageRange}, (_, i) => String(i + 1))
+            .filter(num => !packages[num]);
+    }
+    
+    // ============ SCANNER FUNCTIONS ============
+    
+    async function initTesseract() {
+        if (tesseractWorker) return tesseractWorker;
+        
+        try {
+            tesseractWorker = await Tesseract.createWorker('eng', 1, {
+                logger: m => console.log(m)
+            });
+            await tesseractWorker.setParameters({
+                tessedit_char_whitelist: 'DRIVERAID 0123456789',
+                tessedit_pageseg_mode: '7' // Single line
+            });
+            return tesseractWorker;
+        } catch (e) {
+            console.error('Tesseract init error:', e);
+            return null;
+        }
+    }
+    
+    async function startScanner() {
+        const overlay = document.getElementById('scannerOverlay');
+        const video = document.getElementById('scannerVideo');
+        const statusText = document.getElementById('scanStatusText');
+        
+        overlay.classList.add('active');
+        scannerActive = true;
+        scannedThisSession = [];
+        updateScannedDisplay();
+        
+        statusText.className = 'scan-status-text searching';
+        statusText.innerHTML = '<span class="loading-spinner"></span> Starting camera...';
+        
+        try {
+            videoStream = await navigator.mediaDevices.getUserMedia({
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            });
+            video.srcObject = videoStream;
+            await video.play();
+            
+            // Save video track for flashlight control
+            videoTrack = videoStream.getVideoTracks()[0];
+            
+            // Turn on flashlight by default
+            flashlightOn = false;
+            try {
+                const capabilities = videoTrack.getCapabilities();
+                if (capabilities.torch) {
+                    flashlightOn = true;
+                    await videoTrack.applyConstraints({
+                        advanced: [{ torch: true }]
+                    });
+                }
+            } catch (e) {
+                console.log('Flashlight not available');
+            }
+            updateFlashlightButton();
+            
+            statusText.innerHTML = '<span class="loading-spinner"></span> Loading OCR...';
+            await initTesseract();
+            
+            statusText.innerHTML = '<span class="loading-spinner"></span> Looking for DRIVER AID...';
+            
+            // Start scanning loop
+            scanInterval = setInterval(processFrame, 1500);
+            
+        } catch (e) {
+            console.error('Camera error:', e);
+            statusText.className = 'scan-status-text error';
+            statusText.textContent = '❌ Camera access denied';
+        }
+    }
+    
+    function stopScanner() {
+        scannerActive = false;
+        
+        // Turn off flashlight
+        if (flashlightOn && videoTrack) {
+            try {
+                videoTrack.applyConstraints({ advanced: [{ torch: false }] });
+            } catch (e) {}
+        }
+        flashlightOn = false;
+        videoTrack = null;
+        
+        if (scanInterval) {
+            clearInterval(scanInterval);
+            scanInterval = null;
+        }
+        
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+            videoStream = null;
+        }
+        
+        document.getElementById('scannerOverlay').classList.remove('active');
+        
+        // Add scanned numbers to selection
+        scannedThisSession.forEach(num => {
+            if (!selectedNumbers.includes(num) && !packages[num]) {
+                selectedNumbers.push(num);
+            }
+        });
+        
+        render();
+    }
+    
+    async function processFrame() {
+        if (!scannerActive || isProcessing || !tesseractWorker) return;
+        
+        isProcessing = true;
+        
+        const video = document.getElementById('scannerVideo');
+        const canvas = document.getElementById('scannerCanvas');
+        const ctx = canvas.getContext('2d');
+        const statusText = document.getElementById('scanStatusText');
+        
+        // Set canvas size to match video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Draw current frame
+        ctx.drawImage(video, 0, 0);
+        
+        // Get center region (where scan frame is)
+        const cropX = canvas.width * 0.15;
+        const cropY = canvas.height * 0.3;
+        const cropW = canvas.width * 0.7;
+        const cropH = canvas.height * 0.4;
+        
+        try {
+            const imageData = canvas.toDataURL('image/png');
+            
+            const result = await tesseractWorker.recognize(imageData);
+            const text = result.data.text.toUpperCase();
+            
+            console.log('OCR result:', text);
+            
+            // Look for DRIVER AID pattern
+            const patterns = [
+                /DRIVER\s*AID\s*(\d{1,2})/gi,
+                /AID\s*(\d{1,2})/gi,
+                /DRIVERAID\s*(\d{1,2})/gi
+            ];
+            
+            let foundNumbers = [];
+            
+            for (const pattern of patterns) {
+                let match;
+                while ((match = pattern.exec(text)) !== null) {
+                    const num = parseInt(match[1]);
+                    if (num >= 1 && num <= 50 && !foundNumbers.includes(num)) {
+                        foundNumbers.push(num);
+                    }
+                }
+            }
+            
+            if (foundNumbers.length > 0) {
+                foundNumbers.forEach(num => {
+                    const numStr = String(num);
+                    if (!scannedThisSession.includes(numStr) && !packages[numStr]) {
+                        scannedThisSession.push(numStr);
+                        haptic('scan');
+                        
+                        // Play success sound
+                        try {
+                            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                            const oscillator = audioCtx.createOscillator();
+                            const gainNode = audioCtx.createGain();
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioCtx.destination);
+                            oscillator.frequency.value = 880;
+                            oscillator.type = 'sine';
+                            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                            oscillator.start(audioCtx.currentTime);
+                            oscillator.stop(audioCtx.currentTime + 0.2);
+                        } catch (e) {}
+                    }
+                });
+                
+                statusText.className = 'scan-status-text found';
+                statusText.textContent = `✅ Found: ${foundNumbers.join(', ')}`;
+                
+                updateScannedDisplay();
+            } else {
+                statusText.className = 'scan-status-text searching';
+                statusText.innerHTML = '<span class="loading-spinner"></span> Looking for DRIVER AID...';
+            }
+            
+        } catch (e) {
+            console.error('OCR error:', e);
+        }
+        
+        isProcessing = false;
+    }
+    
+    function updateScannedDisplay() {
+        const container = document.getElementById('scannedNumbers');
+        container.innerHTML = scannedThisSession.map(num => 
+            `<span class="scanned-chip">#${num}</span>`
+        ).join('');
+    }
+    
+    // ============ END SCANNER ============
+    
+    function render() {
+        document.getElementById('app').innerHTML = view === 'assign' ? renderAssignView() : renderDeliveryView();
+        attachListeners();
+        saveState();
+    }
+    
+    function renderCarSVG() {
+        const bc = darkMode ? '#374151' : '#64748b';
+        const bs = darkMode ? '#4b5563' : '#475569';
+        const gc = darkMode ? '#1e3a5f' : '#0ea5e9';
+        const ic = darkMode ? '#1f2937' : '#374151';
+        const dc = darkMode ? '#4b5563' : '#57534e';
+        const wc = darkMode ? '#1f2937' : '#1e293b';
+        const rc = darkMode ? '#4b5563' : '#64748b';
+        return `<svg class="car-svg" viewBox="0 0 180 320" fill="none">
+            <ellipse cx="90" cy="312" rx="65" ry="6" fill="rgba(0,0,0,0.3)"/>
+            <path d="M28 55 Q28 22 58 18 L122 18 Q152 22 152 55 L152 285 Q152 308 122 312 L58 312 Q28 308 28 285 Z" fill="${bc}" stroke="${bs}" stroke-width="2"/>
+            <path d="M48 18 Q90 8 132 18" stroke="${bs}" stroke-width="1.5" fill="none"/>
+            <path d="M40 52 L40 25 Q40 20 55 18 L125 18 Q140 20 140 25 L140 52 Q140 60 130 63 L50 63 Q40 60 40 52 Z" fill="${gc}" opacity="0.6"/>
+            <rect x="38" y="66" width="104" height="105" rx="8" fill="${ic}"/>
+            <rect x="52" y="75" width="76" height="42" rx="6" fill="${darkMode ? '#111827' : '#1e293b'}" opacity="0.8"/>
+            <path d="M43 178 L43 205 Q43 215 55 218 L125 218 Q137 215 137 205 L137 178 Q137 172 125 170 L55 170 Q43 172 43 178 Z" fill="${gc}" opacity="0.5"/>
+            <rect x="36" y="222" width="108" height="82" rx="14" fill="${dc}"/>
+            <rect x="36" y="288" width="30" height="10" rx="3" fill="#ef4444"/>
+            <rect x="114" y="288" width="30" height="10" rx="3" fill="#ef4444"/>
+            <ellipse cx="90" cy="305" rx="12" ry="8" fill="${bs}"/>
+            <ellipse cx="22" cy="65" rx="9" ry="6" fill="${bc}"/>
+            <ellipse cx="158" cy="65" rx="9" ry="6" fill="${bc}"/>
+            <ellipse cx="45" cy="48" rx="14" ry="7" fill="${wc}"/>
+            <ellipse cx="135" cy="48" rx="14" ry="7" fill="${wc}"/>
+            <ellipse cx="45" cy="275" rx="14" ry="7" fill="${wc}"/>
+            <ellipse cx="135" cy="275" rx="14" ry="7" fill="${wc}"/>
+            <ellipse cx="45" cy="48" rx="7" ry="3.5" fill="${rc}"/>
+            <ellipse cx="135" cy="48" rx="7" ry="3.5" fill="${rc}"/>
+            <ellipse cx="45" cy="275" rx="7" ry="3.5" fill="${rc}"/>
+            <ellipse cx="135" cy="275" rx="7" ry="3.5" fill="${rc}"/>
+            <rect x="46" y="73" width="35" height="38" rx="6" fill="${dc}" opacity="0.6"/>
+            <circle cx="63" cy="88" r="12" stroke="${rc}" stroke-width="2.5" fill="none" opacity="0.7"/>
+            <rect x="99" y="73" width="35" height="38" rx="6" fill="${dc}" opacity="0.6"/>
+            <rect x="83" y="73" width="14" height="95" rx="4" fill="${ic}" opacity="0.6"/>
+            <rect x="46" y="125" width="88" height="40" rx="6" fill="${dc}" opacity="0.4"/>
+        </svg>`;
+    }
+    
+    function renderAssignView() {
+        const totalAssigned = getTotalAssigned();
+        const hasSelection = selectedNumbers.length > 0;
+        const unassigned = getUnassignedNumbers();
+        
+        let gridContent = '';
+        if (unassigned.length === 0 && totalAssigned > 0) {
+            gridContent = `<div class="all-assigned">
+                <div class="all-assigned-icon">✅</div>
+                <div class="all-assigned-text">All packages loaded!</div>
+            </div>`;
+        } else if (unassigned.length === 0) {
+            gridContent = `<div class="all-assigned">
+                <div class="all-assigned-icon">📦</div>
+                <div class="all-assigned-text">Select a range above</div>
+            </div>`;
+        } else {
+            gridContent = `<div class="number-grid">
+                ${unassigned.map(num => {
+                    const isSelected = selectedNumbers.includes(num);
+                    return `<div class="sticker ${isSelected ? 'selected' : ''}" data-num="${num}">${num}</div>`;
+                }).join('')}
+            </div>`;
+        }
+        
+        return `<div class="app">
+            <div class="header"><div class="header-row">
+                <div class="logo"><span class="logo-icon">📦</span><span class="logo-text">Flex<span>Runner</span></span></div>
+                <div class="header-actions">
+                    <div class="header-stat">${totalAssigned} loaded</div>
+                    <button class="icon-btn" id="darkModeBtn">${darkMode ? '☀️' : '🌙'}</button>
+                </div>
+            </div></div>
+            <div class="content">
+                <div class="range-selector">
+                    ${ranges.map(r => `<button class="range-btn ${packageRange === r ? 'active' : ''}" data-range="${r}">1–${r}</button>`).join('')}
+                </div>
+                ${gridContent}
+                <div class="car-container">
+                    <div class="car-label">${hasSelection ? `Load <strong>${selectedNumbers.length > 1 ? selectedNumbers.length + ' packages' : '#' + selectedNumbers[0]}</strong> into:` : 'Tap numbers or scan stickers'}</div>
+                    <div class="car-visual">${renderCarSVG()}
+                        <button class="zone-btn zone-passenger ${hasSelection ? 'pulse' : 'disabled'}" data-zone="passenger"><span class="count">${getZoneCount('passenger')}</span><span class="label">Passenger</span></button>
+                        <button class="zone-btn zone-backleft ${hasSelection ? 'pulse' : 'disabled'}" data-zone="backleft"><span class="count">${getZoneCount('backleft')}</span><span class="label">Left</span></button>
+                        <button class="zone-btn zone-backmid ${hasSelection ? 'pulse' : 'disabled'}" data-zone="backmid"><span class="count">${getZoneCount('backmid')}</span><span class="label">Middle</span></button>
+                        <button class="zone-btn zone-backright ${hasSelection ? 'pulse' : 'disabled'}" data-zone="backright"><span class="count">${getZoneCount('backright')}</span><span class="label">Right</span></button>
+                        <button class="zone-btn zone-trunk ${hasSelection ? 'pulse' : 'disabled'}" data-zone="trunk"><span class="count">${getZoneCount('trunk')}</span><span class="label">Trunk</span></button>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-bar">
+                ${hasSelection ? `<div class="selection-info"><strong>${selectedNumbers.length}</strong> package${selectedNumbers.length > 1 ? 's' : ''} selected</div>` : ''}
+                <div class="btn-row">
+                    ${hasSelection ? `<button class="btn btn-ghost btn-small" id="clearSelectionBtn">Clear</button>` : ''}
+                    <button class="btn btn-scan btn-small" id="scanBtn">📷 Scan</button>
+                    <button class="btn btn-secondary btn-small" id="summaryBtn">📋</button>
+                    <button class="btn btn-primary" id="deliveryBtn" ${totalAssigned === 0 ? 'disabled' : ''}>🚚 Start</button>
+                </div>
+            </div>
+        </div>${renderSummaryModal()}`;
+    }
+    
+    function renderSummaryModal() {
+        return `<div class="modal-overlay ${showSummary ? 'active' : ''}" id="summaryModal">
+            <div class="modal"><div class="modal-header">
+                <h2 class="modal-title">📋 Load Summary</h2>
+                <button class="modal-close" id="closeSummary">✕</button>
+            </div><div class="modal-body">
+                ${Object.entries(zones).map(([key, zone]) => {
+                    const zp = Object.entries(packages).filter(([num, z]) => z === key && !delivered.includes(num)).map(([num]) => num).sort((a, b) => Number(a) - Number(b));
+                    return `<div class="zone-section"><div class="zone-header ${zone.class}"><span>${zone.name}</span><span class="zone-count">${zp.length}</span></div>
+                        <div class="package-list">${zp.length > 0 ? zp.map(num => `<div class="package-chip">${num}<button data-remove="${num}">✕</button></div>`).join('') : '<span class="empty-zone">Empty</span>'}</div></div>`;
+                }).join('')}
+                <button class="btn btn-danger" id="clearAllBtn" style="width:100%; margin-top:1.25rem;">🗑️ Clear All</button>
+            </div></div></div>`;
+    }
+    
+    function renderDeliveryView() {
+        const totalDelivered = delivered.length;
+        const totalRemaining = getTotalAssigned();
+        const allDone = totalRemaining === 0 && Object.keys(packages).length > 0;
+        return `<div class="app delivery-mode">
+            <div class="header"><div class="header-row">
+                <div class="logo"><span class="logo-icon">🚚</span><span class="logo-text">Deliver<span>ing</span></span></div>
+                <div class="header-actions">
+                    <button class="icon-btn" id="darkModeBtn">${darkMode ? '☀️' : '🌙'}</button>
+                    <button class="btn btn-secondary btn-small" id="backBtn">← Back</button>
+                </div>
+            </div></div>
+            <div class="content">
+                <div class="delivery-stats">
+                    <div class="delivery-stat done"><div class="delivery-stat-value">${totalDelivered}</div><div class="delivery-stat-label">Delivered</div></div>
+                    <div class="delivery-stat remaining"><div class="delivery-stat-value">${totalRemaining}</div><div class="delivery-stat-label">Remaining</div></div>
+                </div>
+                ${allDone ? `<div class="celebration"><div class="celebration-emoji">🎉</div><div class="celebration-text">Route Complete!</div><div class="celebration-sub">All packages delivered</div></div>` : `
+                    <div class="swipe-hint">Tap to mark delivered • Tap again to undo</div>
+                    ${Object.entries(zones).map(([key, zone]) => {
+                        const zp = Object.entries(packages).filter(([num, z]) => z === key).map(([num]) => num).sort((a, b) => Number(a) - Number(b));
+                        if (zp.length === 0) return '';
+                        const remaining = zp.filter(n => !delivered.includes(n)).length;
+                        return `<div class="delivery-zone"><div class="delivery-zone-header ${zone.class}"><span class="delivery-zone-title">${zone.name}</span><span class="delivery-zone-count">${remaining} left</span></div>
+                            <div class="delivery-packages">${zp.map(num => `<div class="delivery-chip ${delivered.includes(num) ? 'delivered' : ''}" data-deliver="${num}">${num}</div>`).join('')}</div></div>`;
+                    }).join('')}
+                `}
+            </div>
+            <div class="bottom-bar"><div class="btn-row"><button class="btn btn-danger" id="resetDeliveryBtn">↺ Reset Progress</button></div></div>
+        </div>`;
+    }
+    
+    function attachListeners() {
+        document.querySelectorAll('#darkModeBtn').forEach(btn => btn.addEventListener('click', () => { haptic('light'); darkMode = !darkMode; applyDarkMode(); render(); }));
+        document.querySelectorAll('.range-btn').forEach(btn => btn.addEventListener('click', () => { haptic('light'); packageRange = parseInt(btn.dataset.range); selectedNumbers = selectedNumbers.filter(n => parseInt(n) <= packageRange); render(); }));
+        
+        document.querySelectorAll('.sticker').forEach(box => {
+            box.addEventListener('click', () => {
+                haptic('light'); 
+                const num = box.dataset.num; 
+                selectedNumbers = selectedNumbers.includes(num) ? selectedNumbers.filter(n => n !== num) : [...selectedNumbers, num]; 
+                render(); 
+            });
+        });
+        
+        document.querySelectorAll('.zone-btn').forEach(btn => btn.addEventListener('click', () => {
+            if (selectedNumbers.length === 0 || btn.classList.contains('disabled')) return;
+            const zone = btn.dataset.zone;
+            haptic('success');
+            history.push({ type: 'assign', numbers: [...selectedNumbers], prevZones: selectedNumbers.map(n => packages[n]) });
+            selectedNumbers.forEach(num => { packages[num] = zone; delivered = delivered.filter(d => d !== num); });
+            showToast(`${selectedNumbers.length} → ${zones[zone].name}`, true);
+            selectedNumbers = [];
+            render();
+        }));
+        
+        // Scanner button
+        document.getElementById('scanBtn')?.addEventListener('click', () => {
+            haptic('light');
+            startScanner();
+        });
+        
+        document.getElementById('clearSelectionBtn')?.addEventListener('click', () => { haptic('light'); selectedNumbers = []; render(); });
+        document.getElementById('summaryBtn')?.addEventListener('click', () => { haptic('light'); showSummary = true; render(); });
+        document.getElementById('closeSummary')?.addEventListener('click', () => { haptic('light'); showSummary = false; render(); });
+        document.getElementById('summaryModal')?.addEventListener('click', (e) => { if (e.target.id === 'summaryModal') { showSummary = false; render(); } });
+        document.querySelectorAll('[data-remove]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); haptic('medium'); const num = btn.dataset.remove; history.push({ type: 'remove', number: num, zone: packages[num] }); delete packages[num]; showToast(`Removed #${num}`, true); render(); }));
+        document.getElementById('clearAllBtn')?.addEventListener('click', () => { if (confirm('Clear all packages?')) { haptic('medium'); packages = {}; delivered = []; history = []; showSummary = false; render(); } });
+        document.getElementById('deliveryBtn')?.addEventListener('click', () => { if (getTotalAssigned() === 0) return; haptic('success'); selectedNumbers = []; view = 'delivery'; render(); });
+        document.getElementById('backBtn')?.addEventListener('click', () => { haptic('light'); view = 'assign'; render(); });
+        document.querySelectorAll('[data-deliver]').forEach(chip => chip.addEventListener('click', () => {
+            const num = chip.dataset.deliver;
+            haptic('success');
+            if (delivered.includes(num)) { history.push({ type: 'undeliver', number: num }); delivered = delivered.filter(n => n !== num); }
+            else { history.push({ type: 'deliver', number: num }); delivered.push(num); }
+            render();
+        }));
+        document.getElementById('resetDeliveryBtn')?.addEventListener('click', () => { if (confirm('Reset delivery progress?')) { haptic('medium'); delivered = []; render(); } });
+    }
+    
+    // Scanner close handlers
+    document.getElementById('scannerClose')?.addEventListener('click', stopScanner);
+    document.getElementById('scanDoneBtn')?.addEventListener('click', stopScanner);
+    
+    // Flashlight toggle
+    function updateFlashlightButton() {
+        const btn = document.getElementById('flashlightBtn');
+        if (btn) {
+            btn.style.background = flashlightOn ? 'rgba(255,200,0,0.8)' : 'rgba(255,255,255,0.2)';
+            btn.textContent = flashlightOn ? '💡' : '🔦';
+        }
+    }
+    
+    async function toggleFlashlight() {
+        if (!videoTrack) return;
+        
+        try {
+            const capabilities = videoTrack.getCapabilities();
+            if (!capabilities.torch) {
+                showToast('Flashlight not available');
+                return;
+            }
+            
+            flashlightOn = !flashlightOn;
+            await videoTrack.applyConstraints({
+                advanced: [{ torch: flashlightOn }]
+            });
+            updateFlashlightButton();
+            haptic('light');
+        } catch (e) {
+            console.error('Flashlight error:', e);
+            showToast('Flashlight error');
+        }
+    }
+    
+    document.getElementById('flashlightBtn')?.addEventListener('click', toggleFlashlight);
+    
+    window.undoLast = undoLast;
+    render();
+</script>
+```
+
+</body>
+</html>
