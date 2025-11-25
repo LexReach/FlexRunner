@@ -557,11 +557,15 @@
         
         try {
             tesseractWorker = await Tesseract.createWorker('eng', 1, {
-                logger: m => console.log(m)
+                logger: m => {
+                    if (m.status === 'recognizing text') {
+                        // Update progress
+                    }
+                }
             });
+            // Don't restrict characters - let it read everything
             await tesseractWorker.setParameters({
-                tessedit_char_whitelist: 'DRIVERAID 0123456789',
-                tessedit_pageseg_mode: '7' // Single line
+                tessedit_pageseg_mode: '3' // Fully automatic page segmentation
             });
             return tesseractWorker;
         } catch (e) {
@@ -615,10 +619,10 @@
             statusText.innerHTML = '<span class="loading-spinner"></span> Loading OCR...';
             await initTesseract();
             
-            statusText.innerHTML = '<span class="loading-spinner"></span> Looking for DRIVER AID...';
+            statusText.innerHTML = '<span class="loading-spinner"></span> Ready - point at sticker...';
             
-            // Start scanning loop
-            scanInterval = setInterval(processFrame, 1500);
+            // Start scanning loop - every 1 second
+            scanInterval = setInterval(processFrame, 1000);
             
         } catch (e) {
             console.error('Camera error:', e);
@@ -678,36 +682,47 @@
         // Draw current frame
         ctx.drawImage(video, 0, 0);
         
-        // Get center region (where scan frame is)
-        const cropX = canvas.width * 0.15;
-        const cropY = canvas.height * 0.3;
-        const cropW = canvas.width * 0.7;
-        const cropH = canvas.height * 0.4;
-        
         try {
-            const imageData = canvas.toDataURL('image/png');
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
             
             const result = await tesseractWorker.recognize(imageData);
-            const text = result.data.text.toUpperCase();
+            const text = result.data.text.toUpperCase().replace(/[^A-Z0-9\s]/g, ' ');
             
-            console.log('OCR result:', text);
+            // Show what OCR is seeing (for debug)
+            const cleanText = text.replace(/\s+/g, ' ').trim().substring(0, 50);
             
-            // Look for DRIVER AID pattern
+            // Look for DRIVER AID pattern - multiple variations
             const patterns = [
                 /DRIVER\s*AID\s*(\d{1,2})/gi,
+                /DRIVERAID\s*(\d{1,2})/gi,
                 /AID\s*(\d{1,2})/gi,
-                /DRIVERAID\s*(\d{1,2})/gi
+                /DR[I1]VER\s*A[I1]D\s*(\d{1,2})/gi,  // Handle I/1 confusion
+                /DRIV\w*\s*AID\s*(\d{1,2})/gi,       // Partial DRIVER
             ];
             
             let foundNumbers = [];
             
             for (const pattern of patterns) {
                 let match;
-                while ((match = pattern.exec(text)) !== null) {
+                const textCopy = text;
+                while ((match = pattern.exec(textCopy)) !== null) {
                     const num = parseInt(match[1]);
                     if (num >= 1 && num <= 50 && !foundNumbers.includes(num)) {
                         foundNumbers.push(num);
                     }
+                }
+            }
+            
+            // Also try to find standalone numbers if we see "DRIVER" or "AID" anywhere
+            if (foundNumbers.length === 0 && (text.includes('DRIVER') || text.includes('AID'))) {
+                const numberMatches = text.match(/\b(\d{1,2})\b/g);
+                if (numberMatches) {
+                    numberMatches.forEach(n => {
+                        const num = parseInt(n);
+                        if (num >= 1 && num <= 50 && !foundNumbers.includes(num)) {
+                            foundNumbers.push(num);
+                        }
+                    });
                 }
             }
             
@@ -739,13 +754,19 @@
                 statusText.textContent = `✅ Found: ${foundNumbers.join(', ')}`;
                 
                 updateScannedDisplay();
+            } else if (cleanText.length > 3) {
+                // Show what we're seeing for debug
+                statusText.className = 'scan-status-text searching';
+                statusText.innerHTML = `<span class="loading-spinner"></span> Seeing: "${cleanText.substring(0, 30)}..."`;
             } else {
                 statusText.className = 'scan-status-text searching';
-                statusText.innerHTML = '<span class="loading-spinner"></span> Looking for DRIVER AID...';
+                statusText.innerHTML = '<span class="loading-spinner"></span> Point at DRIVER AID sticker...';
             }
             
         } catch (e) {
             console.error('OCR error:', e);
+            statusText.className = 'scan-status-text error';
+            statusText.textContent = '⚠️ OCR error - retrying...';
         }
         
         isProcessing = false;
