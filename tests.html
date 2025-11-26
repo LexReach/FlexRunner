@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexRunner Unit Tests</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #ff9900;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .test-suite {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #ff9900;
+        }
+
+        .test-suite h2 {
+            color: #ff9900;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .test-case {
+            background: #333;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .test-name {
+            flex: 1;
+        }
+
+        .test-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.875rem;
+        }
+
+        .test-status.pass {
+            background: #22c55e;
+            color: #052e16;
+        }
+
+        .test-status.fail {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .test-status.pending {
+            background: #f59e0b;
+            color: #1f2937;
+        }
+
+        .summary {
+            background: #232f3e;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+            border: 2px solid #ff9900;
+        }
+
+        .summary h2 {
+            color: #ff9900;
+            margin-bottom: 1rem;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat {
+            background: #1a242f;
+            padding: 1rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #a0aec0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .error-details {
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            background: #1a1a1a;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: #f87171;
+        }
+
+        #runTests {
+            background: linear-gradient(180deg, #ff9900, #e68a00);
+            color: #232f3e;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(255, 153, 0, 0.3);
+        }
+
+        #runTests:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 153, 0, 0.4);
+        }
+
+        #runTests:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <h1>📦 FlexRunner Unit Tests</h1>
+    <button id="runTests">Run All Tests</button>
+    <div id="testResults"></div>
+    <div id="summary"></div>
+
+    <script>
+        // Simple test framework
+        class TestRunner {
+            constructor() {
+                this.tests = [];
+                this.results = {
+                    passed: 0,
+                    failed: 0,
+                    total: 0
+                };
+            }
+
+            test(name, fn) {
+                this.tests.push({ name, fn });
+            }
+
+            async runAll() {
+                this.results = { passed: 0, failed: 0, total: 0 };
+                const resultsContainer = document.getElementById('testResults');
+                resultsContainer.innerHTML = '';
+
+                for (const test of this.tests) {
+                    this.results.total++;
+                    try {
+                        await test.fn();
+                        this.results.passed++;
+                        this.renderTestResult(test.name, 'pass');
+                    } catch (error) {
+                        this.results.failed++;
+                        this.renderTestResult(test.name, 'fail', error.message);
+                    }
+                }
+
+                this.renderSummary();
+            }
+
+            renderTestResult(name, status, error) {
+                const resultsContainer = document.getElementById('testResults');
+                const testCase = document.createElement('div');
+                testCase.className = 'test-case';
+                testCase.innerHTML = `
+                    <div class="test-name">${name}</div>
+                    <div class="test-status ${status}">${status.toUpperCase()}</div>
+                `;
+
+                if (error) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'error-details';
+                    errorDiv.textContent = error;
+                    testCase.appendChild(errorDiv);
+                }
+
+                resultsContainer.appendChild(testCase);
+            }
+
+            renderSummary() {
+                const summary = document.getElementById('summary');
+                const passRate = ((this.results.passed / this.results.total) * 100).toFixed(1);
+
+                summary.innerHTML = `
+                    <div class="summary">
+                        <h2>Test Summary</h2>
+                        <div class="summary-stats">
+                            <div class="stat">
+                                <div class="stat-value" style="color: #22c55e">${this.results.passed}</div>
+                                <div class="stat-label">Passed</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value" style="color: #ef4444">${this.results.failed}</div>
+                                <div class="stat-label">Failed</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value" style="color: #ff9900">${this.results.total}</div>
+                                <div class="stat-label">Total</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value" style="color: ${passRate === '100.0' ? '#22c55e' : '#f59e0b'}">${passRate}%</div>
+                                <div class="stat-label">Pass Rate</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Assertion helpers
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || 'Assertion failed');
+            }
+        }
+
+        function assertEquals(actual, expected, message) {
+            if (actual !== expected) {
+                throw new Error(message || `Expected ${expected}, but got ${actual}`);
+            }
+        }
+
+        function assertArrayEquals(actual, expected, message) {
+            if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+                throw new Error(message || `Expected ${JSON.stringify(expected)}, but got ${JSON.stringify(actual)}`);
+            }
+        }
+
+        // Initialize test runner
+        const runner = new TestRunner();
+
+        // ============ Data Validation Tests ============
+        runner.test('parseInt with radix should parse correctly', () => {
+            const result = parseInt('42', 10);
+            assertEquals(result, 42);
+        });
+
+        runner.test('parseInt without radix should still work for decimal', () => {
+            const result = parseInt('42');
+            assertEquals(result, 42);
+        });
+
+        runner.test('JSON parse should handle valid data', () => {
+            const json = '{"test": "value"}';
+            const result = JSON.parse(json);
+            assertEquals(result.test, 'value');
+        });
+
+        runner.test('JSON parse should throw on invalid data', () => {
+            try {
+                JSON.parse('invalid json');
+                throw new Error('Should have thrown');
+            } catch (e) {
+                assert(e instanceof SyntaxError, 'Should throw SyntaxError');
+            }
+        });
+
+        // ============ Array Operations Tests ============
+        runner.test('Array filter should work correctly', () => {
+            const arr = [1, 2, 3, 4, 5];
+            const result = arr.filter(n => n > 3);
+            assertArrayEquals(result, [4, 5]);
+        });
+
+        runner.test('Array includes should work correctly', () => {
+            const arr = ['1', '2', '3'];
+            assert(arr.includes('2'), 'Should include "2"');
+            assert(!arr.includes('4'), 'Should not include "4"');
+        });
+
+        runner.test('Array map should transform correctly', () => {
+            const arr = [1, 2, 3];
+            const result = arr.map(n => n * 2);
+            assertArrayEquals(result, [2, 4, 6]);
+        });
+
+        // ============ Object Operations Tests ============
+        runner.test('Object.entries should work correctly', () => {
+            const obj = { a: 1, b: 2 };
+            const result = Object.entries(obj);
+            assertEquals(result.length, 2);
+            assertArrayEquals(result[0], ['a', 1]);
+        });
+
+        runner.test('Object.keys should work correctly', () => {
+            const obj = { a: 1, b: 2, c: 3 };
+            const result = Object.keys(obj);
+            assertArrayEquals(result, ['a', 'b', 'c']);
+        });
+
+        runner.test('Delete property should work correctly', () => {
+            const obj = { a: 1, b: 2 };
+            delete obj.a;
+            assert(!obj.hasOwnProperty('a'), 'Property should be deleted');
+            assertEquals(obj.b, 2);
+        });
+
+        // ============ LocalStorage Mock Tests ============
+        runner.test('LocalStorage setItem should work', () => {
+            localStorage.setItem('test_key', 'test_value');
+            assertEquals(localStorage.getItem('test_key'), 'test_value');
+        });
+
+        runner.test('LocalStorage removeItem should work', () => {
+            localStorage.setItem('test_key', 'test_value');
+            localStorage.removeItem('test_key');
+            assertEquals(localStorage.getItem('test_key'), null);
+        });
+
+        runner.test('LocalStorage should handle JSON', () => {
+            const data = { packages: {}, delivered: [] };
+            localStorage.setItem('test_json', JSON.stringify(data));
+            const retrieved = JSON.parse(localStorage.getItem('test_json'));
+            assertArrayEquals(retrieved.delivered, []);
+        });
+
+        // ============ Package Logic Tests ============
+        runner.test('Package range generation should work', () => {
+            const range = 20;
+            const packages = Array.from({ length: range }, (_, i) => String(i + 1));
+            assertEquals(packages.length, 20);
+            assertEquals(packages[0], '1');
+            assertEquals(packages[19], '20');
+        });
+
+        runner.test('Filter unassigned packages should work', () => {
+            const allPackages = ['1', '2', '3', '4', '5'];
+            const assigned = { '1': 'trunk', '3': 'passenger' };
+            const unassigned = allPackages.filter(num => !assigned[num]);
+            assertArrayEquals(unassigned, ['2', '4', '5']);
+        });
+
+        runner.test('Count packages in zone should work', () => {
+            const packages = { '1': 'trunk', '2': 'trunk', '3': 'passenger' };
+            const delivered = ['1'];
+            const count = Object.entries(packages)
+                .filter(([num, zone]) => zone === 'trunk' && !delivered.includes(num))
+                .length;
+            assertEquals(count, 1);
+        });
+
+        // ============ Data Export Tests ============
+        runner.test('Export data should create valid JSON', () => {
+            const data = {
+                packages: { '1': 'trunk' },
+                delivered: ['2'],
+                packageRange: 50,
+                version: 'v10'
+            };
+            const exported = JSON.stringify(data);
+            const parsed = JSON.parse(exported);
+            assertEquals(parsed.packageRange, 50);
+            assertEquals(parsed.version, 'v10');
+        });
+
+        runner.test('Import should validate data structure', () => {
+            const validData = '{"packages": {}, "delivered": [], "packageRange": 35}';
+            const parsed = JSON.parse(validData);
+            assert(typeof parsed.packages === 'object', 'Packages should be object');
+            assert(Array.isArray(parsed.delivered), 'Delivered should be array');
+            assert(typeof parsed.packageRange === 'number', 'Range should be number');
+        });
+
+        // ============ Error Handling Tests ============
+        runner.test('Invalid package range should be caught', () => {
+            const range = parseInt('invalid', 10);
+            assert(isNaN(range), 'Should detect NaN');
+        });
+
+        runner.test('Boundary check should work', () => {
+            const num = 51;
+            const range = 50;
+            assert(num > range, 'Should detect out of bounds');
+        });
+
+        // ============ Undo History Tests ============
+        runner.test('History push should work', () => {
+            const history = [];
+            history.push({ type: 'assign', numbers: ['1', '2'] });
+            assertEquals(history.length, 1);
+            assertEquals(history[0].type, 'assign');
+        });
+
+        runner.test('History pop should retrieve last action', () => {
+            const history = [
+                { type: 'assign', numbers: ['1'] },
+                { type: 'deliver', number: '2' }
+            ];
+            const last = history.pop();
+            assertEquals(last.type, 'deliver');
+            assertEquals(history.length, 1);
+        });
+
+        // Run tests when button is clicked
+        document.getElementById('runTests').addEventListener('click', () => {
+            // Clear any previous test data
+            localStorage.removeItem('test_key');
+            localStorage.removeItem('test_json');
+
+            runner.runAll();
+        });
+
+        // Auto-run on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('runTests').click();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

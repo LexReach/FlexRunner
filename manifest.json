@@ -1,0 +1,35 @@
+{
+  "name": "FlexRunner - Amazon Flex Package Organizer",
+  "short_name": "FlexRunner",
+  "description": "Organize Amazon Flex packages into car zones for efficient delivery",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#131921",
+  "theme_color": "#232f3e",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Quick Add",
+      "short_name": "Quick Add",
+      "description": "Quickly add packages",
+      "url": "/?quick_add=true"
+    },
+    {
+      "name": "Start Delivery",
+      "short_name": "Deliver",
+      "description": "Start delivery mode",
+      "url": "/?delivery=true"
+    }
+  ]
+}
