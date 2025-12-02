@@ -835,7 +835,10 @@
 
     function markDelivered() {
         Audio.delivered(); haptic('success');
-        selectedPackages.forEach(key => { if (!delivered.includes(key)) delivered.push(key); });
+        selectedPackages.forEach(key => { 
+            delete packages[key]; // Remove from packages entirely
+            delivered = delivered.filter(n => n !== key); // Clean up delivered array too
+        });
         showToast(`${selectedPackages.length} delivered!`);
         selectedPackages = []; save(); render();
     }
@@ -909,7 +912,7 @@
             <div class="zone-tabs">${Object.entries(zones).map(([k, n]) => `<button class="zone-tab ${activeZone === k ? 'active' : ''}" data-tab="${k}"><span class="tab-count">${getZoneCount(k)}</span>${n}</button>`).join('')}</div>
             <div class="package-list-container">${allDone ? `<div class="celebration"><div class="celebration-emoji">🎉</div><div class="celebration-text">All Done!</div><div class="celebration-sub">Route complete</div></div>` : `<div class="package-list">${zp.length === 0 ? `<div class="empty-zone">No packages in ${zones[activeZone]}</div>` : zp.map(key => `<div class="package-chip ${chipSize} ${selectedPackages.includes(key) ? 'selected' : ''}" data-pkg="${key}">${formatNumber(key)}</div>`).join('')}</div>`}</div>
             <div class="selection-bar ${hasSel ? 'active' : ''}"><div class="selection-info"><strong>${selectedPackages.length}</strong> selected</div><div class="selection-actions"><div class="selection-main"><button class="selection-btn deliver" id="deliverBtn">✓ Delivered</button><button class="selection-btn cancel" id="cancelBtn">✕ Cancel</button></div><div class="selection-moves"><button class="selection-btn move" data-move="front">→ Front</button><button class="selection-btn move" data-move="back">→ Back</button><button class="selection-btn move" data-move="trunk">→ Trunk</button></div></div></div>
-            <div class="delivery-bottom" ${hasSel ? 'style="display:none"' : ''}><div class="delivery-actions"><button class="delivery-btn add" id="addBtn">+ Add</button><button class="delivery-btn reset" id="resetBtn">Reset</button></div></div>
+            <div class="delivery-bottom" ${hasSel ? 'style="display:none"' : ''}><div class="delivery-actions"><button class="delivery-btn add" id="addBtn">+ Add</button><button class="delivery-btn reset" id="resetBtn">Clear All</button></div></div>
         </div>`;
     }
 
@@ -926,7 +929,7 @@
         document.getElementById('deliverBtn')?.addEventListener('click', markDelivered);
         document.getElementById('cancelBtn')?.addEventListener('click', clearSelection);
         document.getElementById('addBtn')?.addEventListener('click', showQuickAdd);
-        document.getElementById('resetBtn')?.addEventListener('click', () => { if (confirm('Reset all delivery progress?')) { Audio.keyClick(); haptic('medium'); delivered = []; save(); render(); } });
+        document.getElementById('resetBtn')?.addEventListener('click', () => { if (confirm('Clear ALL packages and start fresh?')) { Audio.keyClick(); haptic('medium'); packages = {}; delivered = []; save(); render(); } });
     }
 
     render();
