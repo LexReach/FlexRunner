@@ -929,7 +929,7 @@
         document.getElementById('deliverBtn')?.addEventListener('click', markDelivered);
         document.getElementById('cancelBtn')?.addEventListener('click', clearSelection);
         document.getElementById('addBtn')?.addEventListener('click', showQuickAdd);
-        document.getElementById('resetBtn')?.addEventListener('click', () => { if (confirm('Clear ALL packages and start fresh?')) { Audio.keyClick(); haptic('medium'); packages = {}; delivered = []; save(); render(); } });
+        document.getElementById('resetBtn')?.addEventListener('click', () => { if (confirm('Clear ALL packages and return to home screen? This cannot be undone.')) { Audio.keyClick(); haptic('medium'); packages = {}; delivered = []; selectedPackages = []; save(); view = 'loading'; render(); } });
     }
 
     render();
