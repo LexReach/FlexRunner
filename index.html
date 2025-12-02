@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="apple-touch-icon.PNG">
+    <meta name="theme-color" content="#131921">
     <title>FlexRunner</title>
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
@@ -334,7 +334,7 @@
 
     /* Selection Bar */
     .selection-bar {
-        padding: 8px;
+        padding: 10px 8px;
         background: var(--amazon-squid);
         border-top: 3px solid var(--amazon-orange);
         display: none;
@@ -346,30 +346,57 @@
         text-align: center;
         font-size: 13px;
         color: var(--gray-400);
-        margin-bottom: 6px;
+        margin-bottom: 8px;
     }
 
     .selection-info strong { color: var(--amazon-orange); font-size: 16px; }
 
     .selection-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .selection-main {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 5px;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
     }
 
     .selection-btn {
-        padding: 12px 2px;
         border: none;
-        border-radius: 8px;
-        font-size: 10px;
+        border-radius: 10px;
         font-weight: 800;
         text-transform: uppercase;
     }
 
-    .selection-btn.move {
-        background: var(--amazon-squid);
+    .selection-btn.deliver {
+        padding: 22px;
+        background: var(--success);
         color: var(--white);
+        font-size: 20px;
+    }
+
+    .selection-btn.cancel {
+        padding: 22px;
+        background: var(--error);
+        color: var(--white);
+        font-size: 18px;
+    }
+
+    .selection-moves {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+    }
+
+    .selection-btn.move {
+        padding: 10px 4px;
+        background: transparent;
+        color: var(--gray-400);
         border: 2px solid var(--gray-500);
+        font-size: 11px;
+        border-radius: 8px;
     }
 
     .selection-btn.move:active {
@@ -377,9 +404,6 @@
         border-color: var(--amazon-orange);
         color: var(--amazon-dark);
     }
-
-    .selection-btn.deliver { background: var(--success); color: var(--white); font-size: 16px; }
-    .selection-btn.cancel { background: var(--error); color: var(--white); font-size: 14px; }
 
     /* Delivery Bottom */
     .delivery-bottom { padding: 6px 8px; }
@@ -840,7 +864,7 @@
             <div class="delivery-stats"><div class="stat-box delivered"><div class="stat-value">${totalD}</div><div class="stat-label">Delivered</div></div><div class="stat-box remaining"><div class="stat-value">${totalR}</div><div class="stat-label">Remaining</div></div></div>
             <div class="zone-tabs">${Object.entries(zones).map(([k, n]) => `<button class="zone-tab ${activeZone === k ? 'active' : ''}" data-tab="${k}"><span class="tab-count">${getZoneCount(k)}</span>${n}</button>`).join('')}</div>
             <div class="package-list-container">${allDone ? `<div class="celebration"><div class="celebration-emoji">🎉</div><div class="celebration-text">All Done!</div><div class="celebration-sub">Route complete</div></div>` : `<div class="package-list">${zp.length === 0 ? `<div class="empty-zone">No packages in ${zones[activeZone]}</div>` : zp.map(key => `<div class="package-chip ${selectedPackages.includes(key) ? 'selected' : ''}" data-pkg="${key}">${formatNumber(key)}</div>`).join('')}</div>`}</div>
-            <div class="selection-bar ${hasSel ? 'active' : ''}"><div class="selection-info"><strong>${selectedPackages.length}</strong> selected</div><div class="selection-actions"><button class="selection-btn move" data-move="front">Front</button><button class="selection-btn move" data-move="back">Back</button><button class="selection-btn move" data-move="trunk">Trunk</button><button class="selection-btn deliver" id="deliverBtn">✓</button><button class="selection-btn cancel" id="cancelBtn">✕</button></div></div>
+            <div class="selection-bar ${hasSel ? 'active' : ''}"><div class="selection-info"><strong>${selectedPackages.length}</strong> selected</div><div class="selection-actions"><div class="selection-main"><button class="selection-btn deliver" id="deliverBtn">✓ Delivered</button><button class="selection-btn cancel" id="cancelBtn">✕ Cancel</button></div><div class="selection-moves"><button class="selection-btn move" data-move="front">→ Front</button><button class="selection-btn move" data-move="back">→ Back</button><button class="selection-btn move" data-move="trunk">→ Trunk</button></div></div></div>
             <div class="delivery-bottom" ${hasSel ? 'style="display:none"' : ''}><div class="delivery-actions"><button class="delivery-btn add" id="addBtn">+ Add</button><button class="delivery-btn reset" id="resetBtn">Reset</button></div></div>
         </div>`;
     }
