@@ -636,6 +636,7 @@
 
     let packages = JSON.parse(localStorage.getItem('fr2_packages') || '{}');
     let delivered = JSON.parse(localStorage.getItem('fr2_delivered') || '[]');
+    let deliveredCount = parseInt(localStorage.getItem('fr2_deliveredCount') || '0');
     let view = 'loading';
     let currentNumber = '';
     let selectedPackages = [];
@@ -749,6 +750,7 @@
     function save() {
         localStorage.setItem('fr2_packages', JSON.stringify(packages));
         localStorage.setItem('fr2_delivered', JSON.stringify(delivered));
+        localStorage.setItem('fr2_deliveredCount', String(deliveredCount));
     }
 
     function showToast(msg, isError = false) {
@@ -767,7 +769,7 @@
     function normalizeKey(num) { return String(parseInt(num, 10) || 0); }
     function getZoneCount(zone) { return Object.entries(packages).filter(([n, z]) => z === zone && !delivered.includes(n)).length; }
     function getTotalRemaining() { return Object.keys(packages).filter(n => !delivered.includes(n)).length; }
-    function getTotalDelivered() { return delivered.length; }
+    function getTotalDelivered() { return deliveredCount; }
     function getZonePackages(zone) { return Object.entries(packages).filter(([n, z]) => z === zone && !delivered.includes(n)).map(([n]) => n).sort((a, b) => parseInt(a) - parseInt(b)); }
     
     function getChipSize(count) {
@@ -835,9 +837,10 @@
 
     function markDelivered() {
         Audio.delivered(); haptic('success');
+        deliveredCount += selectedPackages.length; // Increment counter
         selectedPackages.forEach(key => { 
-            delete packages[key]; // Remove from packages entirely
-            delivered = delivered.filter(n => n !== key); // Clean up delivered array too
+            delete packages[key];
+            delivered = delivered.filter(n => n !== key);
         });
         showToast(`${selectedPackages.length} delivered!`);
         selectedPackages = []; save(); render();
@@ -929,7 +932,7 @@
         document.getElementById('deliverBtn')?.addEventListener('click', markDelivered);
         document.getElementById('cancelBtn')?.addEventListener('click', clearSelection);
         document.getElementById('addBtn')?.addEventListener('click', showQuickAdd);
-        document.getElementById('resetBtn')?.addEventListener('click', () => { if (confirm('Clear ALL packages and return to home screen? This cannot be undone.')) { Audio.keyClick(); haptic('medium'); packages = {}; delivered = []; selectedPackages = []; save(); view = 'loading'; render(); } });
+        document.getElementById('resetBtn')?.addEventListener('click', () => { if (confirm('Clear ALL packages and return to home screen? This cannot be undone.')) { Audio.keyClick(); haptic('medium'); packages = {}; delivered = []; deliveredCount = 0; selectedPackages = []; save(); view = 'loading'; render(); } });
     }
 
     render();
