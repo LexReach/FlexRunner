@@ -6,890 +6,1196 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#232f3e">
+    <meta name="theme-color" content="#131921">
     <title>FlexRunner</title>
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
 ```
 <style>
     :root {
-        --safe-top: env(safe-area-inset-top);
-        --safe-bottom: env(safe-area-inset-bottom);
-        --safe-left: env(safe-area-inset-left);
-        --safe-right: env(safe-area-inset-right);
-        --amazon-orange: #ff9900;
-        --amazon-dark: #232f3e;
-        --amazon-darker: #131921;
-        --amazon-light: #37475a;
-        --radius: 12px;
+        --safe-top: env(safe-area-inset-top, 59px);
+        --safe-bottom: env(safe-area-inset-bottom, 34px);
+        --amazon-orange: #FF9900;
+        --amazon-orange-dark: #E68A00;
+        --amazon-squid: #232F3E;
+        --amazon-dark: #131921;
+        --amazon-light-blue: #00A8E1;
+        --white: #FFFFFF;
+        --gray-400: #888888;
+        --gray-500: #666666;
+        --success: #00A854;
+        --error: #D13212;
     }
 
-    .dark {
-        --bg-primary: #131921;
-        --bg-secondary: #232f3e;
-        --text-primary: #ffffff;
-        --text-secondary: #a0aec0;
-        --border-color: #37475a;
+    * {
+        margin: 0; padding: 0; box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
     }
-    
-    .light {
-        --bg-primary: #f0f2f5;
-        --bg-secondary: #ffffff;
-        --text-primary: #1f2937;
-        --text-secondary: #6b7280;
-        --border-color: #e5e7eb;
+
+    html, body {
+        height: 100%;
+        overflow: hidden;
+        touch-action: manipulation;
     }
-    
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
-    html { height: 100%; }
-    body { 
-        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-        background: var(--bg-primary);
-        min-height: 100%;
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+        background: var(--amazon-dark);
+        color: var(--white);
+        position: fixed;
+        inset: 0;
+    }
+
+    .app, .delivery-app {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
         padding-top: var(--safe-top);
-        padding-left: var(--safe-left);
-        padding-right: var(--safe-right);
-        color: var(--text-primary);
+        padding-bottom: var(--safe-bottom);
     }
-    
-    .app { min-height: 100vh; display: flex; flex-direction: column; }
-    
-    .header {
-        padding: 0.75rem 1rem;
-        background: linear-gradient(180deg, #232f3e 0%, #1a242f 100%);
-        border-bottom: 3px solid var(--amazon-orange);
-        position: sticky; top: 0; z-index: 50;
-    }
-    
-    .header-row { display: flex; justify-content: space-between; align-items: center; }
-    .logo { display: flex; align-items: center; gap: 0.5rem; }
-    .logo-icon { font-size: 1.5rem; }
-    .logo-text { font-size: 1.25rem; font-weight: 800; color: white; }
-    .logo-text span { color: var(--amazon-orange); }
-    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
-    .header-stat { font-size: 0.75rem; font-weight: 700; color: white; background: var(--amazon-orange); padding: 0.375rem 0.75rem; border-radius: 4px; }
-    
-    .icon-btn {
-        width: 36px; height: 36px; border-radius: 6px; border: none;
-        background: var(--amazon-light); color: white; font-size: 1rem;
-        cursor: pointer; display: flex; align-items: center; justify-content: center;
-    }
-    .icon-btn:active { transform: scale(0.95); background: var(--amazon-orange); }
 
-    /* Main Entry Screen */
-    .entry-screen {
-        flex: 1; display: flex; flex-direction: column;
-        padding-bottom: calc(80px + var(--safe-bottom));
+    /* Header */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 16px;
+        background: var(--amazon-squid);
+        border-bottom: 3px solid var(--amazon-orange);
+        flex-shrink: 0;
     }
-    
+
+    .logo {
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .logo span {
+        color: var(--amazon-orange);
+    }
+
+    .zone-counts {
+        display: flex;
+        gap: 16px;
+    }
+
+    .zone-count {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--gray-400);
+        text-transform: uppercase;
+    }
+
+    .zone-count-num {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--white);
+    }
+
+    /* Number Display */
     .number-display {
-        padding: 1.5rem 1rem;
-        display: flex; flex-direction: column; align-items: center;
-        background: var(--bg-secondary);
-        border-bottom: 1px solid var(--border-color);
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px 16px;
+        background: var(--amazon-squid);
     }
+
     .current-number {
-        font-size: 4.5rem; font-weight: 900; color: var(--text-primary);
-        min-height: 5.5rem; display: flex; align-items: center;
+        font-size: 100px;
+        font-weight: 800;
+        letter-spacing: -3px;
+        line-height: 1;
+        color: var(--white);
         font-variant-numeric: tabular-nums;
     }
-    .current-number.empty { color: var(--text-secondary); }
-    .current-number.exists { color: var(--amazon-orange); }
-    .number-hint {
-        font-size: 0.875rem; color: var(--text-secondary);
-        margin-top: 0.5rem; min-height: 1.25rem;
-    }
-    .number-hint.exists { color: var(--amazon-orange); font-weight: 600; }
-    
-    .zone-quick-select {
-        display: flex; gap: 0.5rem; padding: 1rem;
-        overflow-x: auto; -webkit-overflow-scrolling: touch;
-    }
-    .zone-quick-btn {
-        flex: 1; min-width: 60px; padding: 0.75rem 0.5rem;
-        border: 2px solid var(--border-color); border-radius: 8px;
-        background: var(--bg-secondary); cursor: pointer;
-        display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
-        transition: all 0.15s ease;
-    }
-    .zone-quick-btn:active { transform: scale(0.95); }
-    .zone-quick-btn.disabled { opacity: 0.4; }
-    .zone-quick-btn .zone-icon { font-size: 1.25rem; }
-    .zone-quick-btn .zone-name { font-size: 0.625rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; }
-    .zone-quick-btn .zone-count { font-size: 1rem; font-weight: 800; color: var(--text-primary); }
-    
-    .zone-quick-btn.passenger { border-color: #3b82f6; }
-    .zone-quick-btn.passenger.active { background: #3b82f6; }
-    .zone-quick-btn.backleft { border-color: #22c55e; }
-    .zone-quick-btn.backleft.active { background: #22c55e; }
-    .zone-quick-btn.backmid { border-color: #a855f7; }
-    .zone-quick-btn.backmid.active { background: #a855f7; }
-    .zone-quick-btn.backright { border-color: #f97316; }
-    .zone-quick-btn.backright.active { background: #f97316; }
-    .zone-quick-btn.trunk { border-color: #ec4899; }
-    .zone-quick-btn.trunk.active { background: #ec4899; }
-    .zone-quick-btn.active .zone-name,
-    .zone-quick-btn.active .zone-count { color: white; }
-    
-    .numpad {
-        flex: 1; display: flex; flex-direction: column;
-        padding: 0.75rem; gap: 0.5rem;
-        max-width: 400px; margin: 0 auto; width: 100%;
-    }
-    .numpad-row { display: flex; gap: 0.5rem; flex: 1; }
-    .numpad-btn {
-        flex: 1; border: none; border-radius: 12px;
-        font-size: 1.75rem; font-weight: 700; cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        transition: all 0.1s ease;
-        min-height: 60px;
-    }
-    .numpad-btn:active { transform: scale(0.95); }
-    .numpad-btn.digit {
-        background: var(--bg-secondary); color: var(--text-primary);
-        border: 1px solid var(--border-color);
-    }
-    .numpad-btn.action {
-        background: var(--amazon-light); color: white;
-    }
-    .numpad-btn.action.clear {
-        background: #dc2626; color: white;
-    }
-    .numpad-btn.add {
-        background: linear-gradient(145deg, #22c55e, #16a34a); color: white;
-        font-size: 1.5rem;
-    }
-    .numpad-btn.add.disabled {
-        opacity: 0.4; cursor: not-allowed;
-    }
-    
-    /* Bottom Bar */
-    .bottom-bar {
-        position: fixed; bottom: 0; left: 0; right: 0;
-        padding: 0.75rem 1rem;
-        background: linear-gradient(180deg, #232f3e 0%, #1a242f 100%);
-        border-top: 3px solid var(--amazon-orange);
-        padding-bottom: calc(0.75rem + var(--safe-bottom));
-        z-index: 50;
-    }
-    .btn-row { display: flex; gap: 0.5rem; }
-    
-    .btn {
-        flex: 1; padding: 0.875rem; border: none; border-radius: 8px;
-        font-size: 0.9375rem; font-weight: 700; cursor: pointer;
-        display: flex; align-items: center; justify-content: center; gap: 0.375rem;
-        transition: all 0.15s ease;
-    }
-    .btn:active { transform: scale(0.97); }
-    .btn-primary { background: linear-gradient(180deg, var(--amazon-orange), #e68a00); color: #232f3e; box-shadow: 0 4px 12px rgba(255, 153, 0, 0.3); }
-    .btn-secondary { background: var(--amazon-light); color: white; }
-    .btn-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-    .btn-small { padding: 0.625rem 1rem; font-size: 0.875rem; flex: 0; }
 
-    /* Confirmation Modal */
-    .confirm-overlay {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-        display: none; align-items: center; justify-content: center;
-        z-index: 200; padding: 1.5rem;
+    .current-number.empty { color: var(--gray-500); }
+    .current-number.exists { color: var(--amazon-orange); }
+
+    .number-hint {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--gray-400);
+        margin-top: 8px;
     }
-    .confirm-overlay.active { display: flex; }
-    .confirm-modal {
-        background: var(--bg-secondary); border-radius: 16px;
-        width: 100%; max-width: 340px; overflow: hidden;
-        border: 1px solid var(--border-color);
+
+    .number-hint.exists { color: var(--amazon-orange); }
+
+    /* Numpad */
+    .numpad {
+        flex: 1;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(4, 1fr);
+        gap: 8px;
+        padding: 8px 12px;
+        min-height: 0;
     }
-    .confirm-header {
-        padding: 1.25rem;
+
+    .numpad-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        font-weight: 600;
+        border: none;
+        border-radius: 14px;
+        cursor: pointer;
+        background: var(--amazon-squid);
+        color: var(--white);
+        transition: transform 0.1s ease;
+    }
+
+    .numpad-btn:active {
+        transform: scale(0.94);
+        background: #3a4553;
+    }
+
+    .numpad-btn.clear {
+        background: var(--error);
+        font-size: 26px;
+        font-weight: 800;
+    }
+
+    .numpad-btn.backspace {
+        background: var(--gray-500);
+        font-size: 30px;
+    }
+
+    /* Zone Buttons */
+    .zone-buttons {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        padding: 10px 12px;
+        flex-shrink: 0;
+    }
+
+    .zone-btn {
+        padding: 22px 8px;
+        border: 3px solid var(--amazon-orange);
+        border-radius: 14px;
+        background: transparent;
+        color: var(--amazon-orange);
+        font-size: 20px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .zone-btn:active {
+        transform: scale(0.95);
+        background: var(--amazon-orange);
+        color: var(--amazon-dark);
+    }
+
+    .zone-btn.disabled {
+        opacity: 0.25;
+        pointer-events: none;
+    }
+
+    /* Bottom CTA */
+    .bottom-cta {
+        padding: 10px 12px;
+        flex-shrink: 0;
+    }
+
+    .cta-btn {
+        width: 100%;
+        padding: 20px;
+        border: none;
+        border-radius: 14px;
+        background: linear-gradient(180deg, var(--amazon-orange) 0%, var(--amazon-orange-dark) 100%);
+        color: var(--amazon-dark);
+        font-size: 20px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+    }
+
+    .cta-btn:active { transform: scale(0.98); }
+    .cta-btn:disabled { opacity: 0.35; }
+
+    /* Delivery Header */
+    .delivery-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 16px;
+        background: var(--amazon-squid);
+        border-bottom: 3px solid var(--success);
+        flex-shrink: 0;
+    }
+
+    .delivery-title {
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .delivery-title span { color: var(--success); }
+
+    .back-btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        background: var(--gray-500);
+        color: var(--white);
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    /* Stats */
+    .delivery-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        padding: 12px 16px;
+        flex-shrink: 0;
+    }
+
+    .stat-box {
+        padding: 18px;
+        border-radius: 14px;
+        text-align: center;
+    }
+
+    .stat-box.delivered {
+        background: linear-gradient(145deg, #00875A, var(--success));
+    }
+
+    .stat-box.remaining {
+        background: linear-gradient(145deg, #0066AA, var(--amazon-light-blue));
+    }
+
+    .stat-value {
+        font-size: 52px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 6px;
+        opacity: 0.9;
+    }
+
+    /* Zone Tabs */
+    .zone-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        padding: 8px 16px;
+        flex-shrink: 0;
+    }
+
+    .zone-tab {
+        padding: 14px 8px;
+        border: 2px solid var(--gray-500);
+        border-radius: 12px;
+        background: transparent;
+        color: var(--gray-400);
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .zone-tab.active {
+        border-color: var(--amazon-orange);
+        background: var(--amazon-orange);
+        color: var(--amazon-dark);
+    }
+
+    .zone-tab .tab-count {
+        display: block;
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: 2px;
+    }
+
+    /* Package List */
+    .package-list-container {
+        flex: 1;
+        min-height: 0;
+        padding: 8px 16px;
+        overflow: hidden;
+    }
+
+    .package-list {
+        height: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        display: flex;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        gap: 10px;
+    }
+
+    .package-chip {
+        height: 60px;
+        min-width: 80px;
+        padding: 0 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: var(--amazon-squid);
+        border: 3px solid var(--gray-500);
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--white);
+        cursor: pointer;
+    }
+
+    .package-chip:active { transform: scale(0.95); }
+
+    .package-chip.selected {
+        border-color: var(--amazon-orange);
+        background: rgba(255, 153, 0, 0.25);
+        color: var(--amazon-orange);
+    }
+
+    .empty-zone {
+        width: 100%;
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--gray-500);
+        font-size: 18px;
+    }
+
+    /* Selection Bar */
+    .selection-bar {
+        padding: 12px 16px;
+        background: var(--amazon-squid);
+        border-top: 3px solid var(--amazon-orange);
+        flex-shrink: 0;
+        display: none;
+    }
+
+    .selection-bar.active { display: block; }
+
+    .selection-info {
+        text-align: center;
+        font-size: 16px;
+        color: var(--gray-400);
+        margin-bottom: 12px;
+    }
+
+    .selection-info strong {
+        color: var(--amazon-orange);
+        font-size: 20px;
+    }
+
+    .selection-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        gap: 8px;
+    }
+
+    .selection-btn {
+        padding: 16px 6px;
+        border: none;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        cursor: pointer;
+    }
+
+    .selection-btn.move {
+        background: var(--amazon-squid);
+        color: var(--white);
+        border: 2px solid var(--gray-500);
+    }
+
+    .selection-btn.move:active {
+        background: var(--amazon-orange);
+        border-color: var(--amazon-orange);
+        color: var(--amazon-dark);
+    }
+
+    .selection-btn.deliver {
+        background: var(--success);
+        color: var(--white);
+    }
+
+    .selection-btn.cancel {
+        background: var(--error);
+        color: var(--white);
+        font-size: 18px;
+    }
+
+    /* Delivery Bottom */
+    .delivery-bottom {
+        padding: 12px 16px;
+        flex-shrink: 0;
+    }
+
+    .delivery-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .delivery-btn {
+        padding: 18px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        text-transform: uppercase;
+    }
+
+    .delivery-btn.add {
+        background: var(--amazon-orange);
+        color: var(--amazon-dark);
+    }
+
+    .delivery-btn.reset {
+        background: var(--amazon-squid);
+        color: var(--gray-400);
+        border: 2px solid var(--gray-500);
+    }
+
+    /* Modal */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.92);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 24px;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+        width: 100%;
+        max-width: 360px;
+        background: var(--amazon-squid);
+        border-radius: 20px;
+        overflow: hidden;
+        border: 3px solid var(--amazon-orange);
+    }
+
+    .modal-header {
+        padding: 28px;
         background: var(--amazon-orange);
         text-align: center;
     }
-    .confirm-number {
-        font-size: 3rem; font-weight: 900; color: #232f3e;
-    }
-    .confirm-body {
-        padding: 1.25rem;
-    }
-    .confirm-message {
-        font-size: 1rem; color: var(--text-primary);
-        text-align: center; margin-bottom: 1rem; line-height: 1.5;
-    }
-    .confirm-current {
-        background: var(--bg-primary); padding: 0.75rem;
-        border-radius: 8px; text-align: center; margin-bottom: 1rem;
-    }
-    .confirm-current-label {
-        font-size: 0.75rem; color: var(--text-secondary);
-        text-transform: uppercase; margin-bottom: 0.25rem;
-    }
-    .confirm-current-zone {
-        font-size: 1.125rem; font-weight: 700; color: var(--text-primary);
-    }
-    .confirm-buttons {
-        display: flex; flex-direction: column; gap: 0.5rem;
-    }
-    .confirm-btn {
-        padding: 1rem; border: none; border-radius: 8px;
-        font-size: 1rem; font-weight: 700; cursor: pointer;
-        display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-    }
-    .confirm-btn:active { transform: scale(0.97); }
-    .confirm-btn.move {
-        background: var(--amazon-orange); color: #232f3e;
-    }
-    .confirm-btn.cancel {
-        background: var(--bg-primary); color: var(--text-secondary);
-        border: 1px solid var(--border-color);
+
+    .modal-number {
+        font-size: 72px;
+        font-weight: 800;
+        color: var(--amazon-dark);
     }
 
-    /* Summary Modal */
-    .modal-overlay {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-        display: flex; align-items: center; justify-content: center;
-        z-index: 100; padding: 1rem; opacity: 0; visibility: hidden; transition: all 0.2s ease;
-    }
-    .modal-overlay.active { opacity: 1; visibility: visible; }
-    .modal {
-        background: var(--bg-secondary); border-radius: var(--radius);
-        width: 100%; max-width: 380px; max-height: 85vh; overflow: hidden;
-        transform: scale(0.9) translateY(20px); transition: transform 0.25s ease;
-        border: 1px solid var(--border-color);
-    }
-    .modal-overlay.active .modal { transform: scale(1) translateY(0); }
-    .modal-header {
-        padding: 1rem 1.25rem;
-        background: linear-gradient(180deg, #232f3e 0%, #1a242f 100%);
-        border-bottom: 2px solid var(--amazon-orange);
-        display: flex; justify-content: space-between; align-items: center;
-    }
-    .modal-title { font-size: 1.125rem; font-weight: 700; color: white; }
-    .modal-close {
-        background: var(--amazon-light); border: none; font-size: 1rem; color: white;
-        cursor: pointer; width: 32px; height: 32px; border-radius: 6px;
-        display: flex; align-items: center; justify-content: center;
-    }
-    .modal-body { padding: 1rem 1.25rem; max-height: 65vh; overflow-y: auto; background: var(--bg-primary); }
-    
-    .zone-section { margin-bottom: 1rem; }
-    .zone-header {
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 0.625rem 0.875rem; border-radius: 6px; margin-bottom: 0.5rem;
-        font-weight: 700; font-size: 0.875rem; color: white;
-    }
-    .zone-header.passenger { background: #3b82f6; }
-    .zone-header.backleft { background: #22c55e; }
-    .zone-header.backmid { background: #a855f7; }
-    .zone-header.backright { background: #f97316; }
-    .zone-header.trunk { background: #ec4899; }
-    .zone-header .zone-count { background: rgba(0,0,0,0.2); padding: 0.125rem 0.5rem; border-radius: 3px; }
-    
-    .package-list { display: flex; flex-wrap: wrap; gap: 0.375rem; }
-    .package-chip {
-        background: var(--bg-secondary);
-        padding: 0.5rem 0.625rem; border-radius: 6px;
-        font-size: 0.9375rem; font-weight: 700; color: var(--text-primary);
-        display: flex; align-items: center; gap: 0.5rem;
-        border: 1px solid var(--border-color);
-    }
-    .package-chip button { 
-        background: #dc2626; border: none; color: white; 
-        cursor: pointer; font-size: 0.7rem; padding: 0.125rem 0.375rem; 
-        border-radius: 3px; font-weight: 700;
-    }
-    .empty-zone { color: var(--text-secondary); font-size: 0.8125rem; font-style: italic; }
+    .modal-body { padding: 24px; }
 
-    /* Delivery View */
-    .delivery-zone {
-        background: var(--bg-secondary); border-radius: var(--radius);
-        padding: 1rem; margin-bottom: 0.75rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 1px solid var(--border-color);
+    .modal-message {
+        text-align: center;
+        font-size: 18px;
+        color: var(--gray-400);
+        margin-bottom: 20px;
     }
-    .delivery-zone-header {
-        display: flex; justify-content: space-between; align-items: center;
-        margin-bottom: 0.75rem; padding-bottom: 0.625rem;
+
+    .modal-current {
+        background: var(--amazon-dark);
+        padding: 18px;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 24px;
     }
-    .delivery-zone-header.passenger { border-bottom: 3px solid #3b82f6; }
-    .delivery-zone-header.backleft { border-bottom: 3px solid #22c55e; }
-    .delivery-zone-header.backmid { border-bottom: 3px solid #a855f7; }
-    .delivery-zone-header.backright { border-bottom: 3px solid #f97316; }
-    .delivery-zone-header.trunk { border-bottom: 3px solid #ec4899; }
-    .delivery-zone-title { font-weight: 700; font-size: 1rem; color: var(--text-primary); }
-    .delivery-zone-count { font-size: 0.8125rem; font-weight: 600; color: var(--text-secondary); }
-    .delivery-packages { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-    .delivery-chip {
-        background: var(--bg-primary); border: 2px solid var(--border-color);
-        padding: 0.75rem 1rem; border-radius: 8px;
-        font-size: 1.125rem; font-weight: 800; color: var(--text-primary);
-        cursor: pointer; transition: all 0.15s ease; min-width: 60px; text-align: center;
+
+    .modal-current-label {
+        font-size: 12px;
+        color: var(--gray-500);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 6px;
     }
-    .delivery-chip:active { transform: scale(0.95); }
-    .delivery-chip.delivered {
-        background: #22c55e; border-color: #22c55e;
-        color: white; opacity: 0.7;
+
+    .modal-current-zone {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--white);
     }
-    
-    .delivery-stats { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
-    .delivery-stat { flex: 1; text-align: center; padding: 1.25rem 1rem; border-radius: 10px; }
-    .delivery-stat.done { background: linear-gradient(145deg, #065f46, #047857); }
-    .delivery-stat.remaining { background: linear-gradient(145deg, #1e40af, #2563eb); }
-    .delivery-stat-value { font-size: 2.5rem; font-weight: 800; line-height: 1; color: white; }
-    .delivery-stat-label { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.375rem; color: rgba(255,255,255,0.8); }
-    
-    .celebration { text-align: center; padding: 3rem 1rem; }
-    .celebration-emoji { font-size: 5rem; animation: bounce 0.8s ease infinite; }
-    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-    .celebration-text { font-size: 1.75rem; font-weight: 800; color: var(--text-primary); margin-top: 1rem; }
-    .celebration-sub { font-size: 1rem; color: var(--amazon-orange); margin-top: 0.5rem; }
-    
-    .content {
-        flex: 1; padding: 1rem;
-        padding-bottom: calc(100px + var(--safe-bottom));
-        overflow-y: auto; -webkit-overflow-scrolling: touch;
+
+    .modal-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
     }
-    
+
+    .modal-btn {
+        padding: 20px;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 800;
+        cursor: pointer;
+        text-transform: uppercase;
+    }
+
+    .modal-btn.confirm {
+        background: var(--amazon-orange);
+        color: var(--amazon-dark);
+    }
+
+    .modal-btn.cancel {
+        background: var(--amazon-dark);
+        color: var(--gray-400);
+    }
+
+    /* Toast */
     .toast {
-        position: fixed; bottom: calc(100px + var(--safe-bottom)); left: 50%;
-        transform: translateX(-50%) translateY(100px);
-        background: #22c55e; color: white;
-        padding: 0.75rem 1.25rem; border-radius: 8px;
-        font-size: 0.9375rem; font-weight: 700; opacity: 0;
-        transition: all 0.3s ease; z-index: 300;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        position: fixed;
+        top: calc(var(--safe-top) + 70px);
+        left: 50%;
+        transform: translateX(-50%) translateY(-20px);
+        background: var(--success);
+        color: var(--white);
+        padding: 16px 28px;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 700;
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 2000;
+        pointer-events: none;
     }
-    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    .toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+
+    .toast.error { background: var(--error); }
+
+    /* Celebration */
+    .celebration {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .celebration-emoji {
+        font-size: 100px;
+        animation: bounce 0.6s ease infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+
+    .celebration-text {
+        font-size: 36px;
+        font-weight: 800;
+        margin-top: 20px;
+    }
+
+    .celebration-sub {
+        font-size: 20px;
+        color: var(--amazon-orange);
+        margin-top: 10px;
+    }
+
+    /* Quick Add Overlay */
+    .quick-add-overlay {
+        position: fixed;
+        inset: 0;
+        background: var(--amazon-dark);
+        display: none;
+        flex-direction: column;
+        z-index: 1000;
+        padding-top: var(--safe-top);
+        padding-bottom: var(--safe-bottom);
+    }
+
+    .quick-add-overlay.active { display: flex; }
+
+    .quick-add-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background: var(--amazon-squid);
+        border-bottom: 3px solid var(--amazon-orange);
+    }
+
+    .quick-add-title {
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .quick-add-close {
+        width: 48px;
+        height: 48px;
+        border: none;
+        border-radius: 50%;
+        background: var(--error);
+        color: var(--white);
+        font-size: 28px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 </style>
 ```
 
 </head>
-<body class="dark">
+<body>
     <div id="app"></div>
     <div class="toast" id="toast"></div>
 
 ```
-<!-- Confirmation Modal -->
-<div class="confirm-overlay" id="confirmOverlay">
-    <div class="confirm-modal">
-        <div class="confirm-header">
-            <div class="confirm-number" id="confirmNumber">000</div>
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-number" id="modalNumber">01</div>
         </div>
-        <div class="confirm-body">
-            <div class="confirm-message">This package is already loaded</div>
-            <div class="confirm-current">
-                <div class="confirm-current-label">Currently in</div>
-                <div class="confirm-current-zone" id="confirmCurrentZone">Trunk</div>
+        <div class="modal-body">
+            <div class="modal-message">Already loaded</div>
+            <div class="modal-current">
+                <div class="modal-current-label">Currently in</div>
+                <div class="modal-current-zone" id="modalCurrentZone">Front</div>
             </div>
-            <div class="confirm-buttons">
-                <button class="confirm-btn move" id="confirmMove">Move to <span id="confirmNewZone">Passenger</span></button>
-                <button class="confirm-btn cancel" id="confirmCancel">Keep Current Location</button>
+            <div class="modal-buttons">
+                <button class="modal-btn confirm" id="modalConfirm">Move to <span id="modalNewZone">Back</span></button>
+                <button class="modal-btn cancel" id="modalCancel">Keep Current</button>
             </div>
         </div>
     </div>
 </div>
 
+<div class="quick-add-overlay" id="quickAddOverlay">
+    <div class="quick-add-header">
+        <span class="quick-add-title">Quick Add</span>
+        <button class="quick-add-close" id="quickAddClose">✕</button>
+    </div>
+    <div id="quickAddContent" style="flex:1;display:flex;flex-direction:column;"></div>
+</div>
+
 <script>
-    // State
-    let packages = JSON.parse(localStorage.getItem('packages_v11') || '{}');
-    let delivered = JSON.parse(localStorage.getItem('delivered_v11') || '[]');
-    let darkMode = localStorage.getItem('darkMode_v11') !== 'false';
-    let view = 'entry'; // 'entry', 'delivery', 'summary'
-    let showSummary = false;
-    
-    // Entry state
+    let packages = JSON.parse(localStorage.getItem('fr2_packages') || '{}');
+    let delivered = JSON.parse(localStorage.getItem('fr2_delivered') || '[]');
+    let view = 'loading';
     let currentNumber = '';
-    let selectedZone = 'trunk'; // Default zone
-    
-    // Confirmation state
-    let pendingNumber = null;
-    let pendingZone = null;
-    
-    const zones = {
-        passenger: { name: 'Passenger', icon: '💺', class: 'passenger' },
-        backleft: { name: 'Back L', icon: '⬅️', class: 'backleft' },
-        backmid: { name: 'Back M', icon: '🔳', class: 'backmid' },
-        backright: { name: 'Back R', icon: '➡️', class: 'backright' },
-        trunk: { name: 'Trunk', icon: '🚗', class: 'trunk' }
+    let selectedPackages = [];
+    let activeZone = 'front';
+    let pendingMove = null;
+    let quickAddNumber = '';
+
+    const zones = { front: 'Front', back: 'Back', trunk: 'Trunk' };
+
+    // Audio Engine
+    const Audio = {
+        ctx: null,
+        init() {
+            if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            if (this.ctx.state === 'suspended') this.ctx.resume();
+        },
+        keyClick() {
+            this.init();
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = 'bandpass'; filter.frequency.value = 3200; filter.Q.value = 0.8;
+            osc.connect(filter); filter.connect(gain); gain.connect(this.ctx.destination);
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(2000, now);
+            osc.frequency.exponentialRampToValueAtTime(800, now + 0.025);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+            osc.start(now); osc.stop(now + 0.04);
+            
+            const osc2 = this.ctx.createOscillator();
+            const gain2 = this.ctx.createGain();
+            osc2.connect(gain2); gain2.connect(this.ctx.destination);
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(180, now);
+            osc2.frequency.exponentialRampToValueAtTime(60, now + 0.05);
+            gain2.gain.setValueAtTime(0.08, now);
+            gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+            osc2.start(now); osc2.stop(now + 0.06);
+        },
+        success() {
+            this.init();
+            const now = this.ctx.currentTime;
+            const osc1 = this.ctx.createOscillator();
+            const gain1 = this.ctx.createGain();
+            osc1.connect(gain1); gain1.connect(this.ctx.destination);
+            osc1.type = 'sine'; osc1.frequency.value = 880;
+            gain1.gain.setValueAtTime(0, now);
+            gain1.gain.linearRampToValueAtTime(0.22, now + 0.01);
+            gain1.gain.setValueAtTime(0.22, now + 0.07);
+            gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+            osc1.start(now); osc1.stop(now + 0.11);
+
+            const osc2 = this.ctx.createOscillator();
+            const gain2 = this.ctx.createGain();
+            osc2.connect(gain2); gain2.connect(this.ctx.destination);
+            osc2.type = 'sine'; osc2.frequency.value = 1174.66;
+            gain2.gain.setValueAtTime(0, now + 0.09);
+            gain2.gain.linearRampToValueAtTime(0.28, now + 0.1);
+            gain2.gain.setValueAtTime(0.28, now + 0.2);
+            gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+            osc2.start(now + 0.09); osc2.stop(now + 0.32);
+        },
+        delivered() {
+            this.init();
+            const now = this.ctx.currentTime;
+            [1318.51, 1567.98, 2093.00].forEach((freq, i) => {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.type = 'sine'; osc.frequency.value = freq;
+                const t = now + (i * 0.07);
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.18, t + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+                osc.start(t); osc.stop(t + 0.28);
+            });
+        },
+        error() {
+            this.init();
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(300, now);
+            osc.frequency.exponentialRampToValueAtTime(150, now + 0.18);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+            osc.start(now); osc.stop(now + 0.22);
+        },
+        tap() {
+            this.init();
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.type = 'sine'; osc.frequency.value = 1400;
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+            osc.start(now); osc.stop(now + 0.06);
+        }
     };
-    
-    function applyDarkMode() {
-        document.body.classList.toggle('dark', darkMode);
-        document.body.classList.toggle('light', !darkMode);
-    }
-    applyDarkMode();
-    
+
     function haptic(style = 'light') {
         if ('vibrate' in navigator) {
-            const patterns = { light: [10], medium: [20], success: [10, 50, 10], error: [50, 30, 50] };
-            navigator.vibrate(patterns[style] || [10]);
+            const p = { light: [8], medium: [15], success: [10, 30, 10], error: [40, 20, 40] };
+            navigator.vibrate(p[style] || [8]);
         }
     }
-    
-    function playSound(freq = 880, duration = 0.15) {
-        try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            oscillator.frequency.value = freq;
-            oscillator.type = 'sine';
-            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            oscillator.start(audioCtx.currentTime);
-            oscillator.stop(audioCtx.currentTime + duration);
-        } catch (e) {}
+
+    function save() {
+        localStorage.setItem('fr2_packages', JSON.stringify(packages));
+        localStorage.setItem('fr2_delivered', JSON.stringify(delivered));
     }
-    
-    function saveState() {
-        localStorage.setItem('packages_v11', JSON.stringify(packages));
-        localStorage.setItem('delivered_v11', JSON.stringify(delivered));
-        localStorage.setItem('darkMode_v11', darkMode);
+
+    function showToast(msg, isError = false) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast' + (isError ? ' error' : '');
+        setTimeout(() => t.classList.add('show'), 10);
+        setTimeout(() => t.classList.remove('show'), 1800);
     }
-    
-    function showToast(message) {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2000);
-    }
-    
-    function getZoneCount(zoneKey) {
-        return Object.entries(packages).filter(([num, zone]) => zone === zoneKey && !delivered.includes(num)).length;
-    }
-    
-    function getTotalPackages() {
-        return Object.keys(packages).filter(num => !delivered.includes(num)).length;
-    }
-    
+
     function formatNumber(num) {
-        return num.padStart(3, '0');
+        const n = String(parseInt(num, 10) || 0);
+        return n.length === 1 ? '0' + n : n;
     }
-    
-    // ============ ENTRY FUNCTIONS ============
-    
-    function handleDigit(digit) {
-        haptic('light');
-        if (currentNumber.length >= 3) {
-            currentNumber = digit;
-        } else {
-            currentNumber += digit;
-        }
+
+    function normalizeKey(num) {
+        return String(parseInt(num, 10) || 0);
+    }
+
+    function getZoneCount(zone) {
+        return Object.entries(packages).filter(([n, z]) => z === zone && !delivered.includes(n)).length;
+    }
+
+    function getTotalRemaining() {
+        return Object.keys(packages).filter(n => !delivered.includes(n)).length;
+    }
+
+    function getTotalDelivered() {
+        return delivered.length;
+    }
+
+    function getZonePackages(zone, includeDelivered = false) {
+        return Object.entries(packages)
+            .filter(([n, z]) => z === zone && (includeDelivered || !delivered.includes(n)))
+            .map(([n]) => n)
+            .sort((a, b) => parseInt(a) - parseInt(b));
+    }
+
+    // Loading Mode
+    function handleDigit(d) {
+        Audio.keyClick(); haptic('light');
+        if (currentNumber.length >= 3) currentNumber = d;
+        else currentNumber += d;
         render();
     }
-    
+
     function handleClear() {
-        haptic('light');
+        Audio.keyClick(); haptic('light');
         currentNumber = '';
         render();
     }
-    
+
     function handleBackspace() {
-        haptic('light');
+        Audio.keyClick(); haptic('light');
         currentNumber = currentNumber.slice(0, -1);
         render();
     }
-    
-    function handleAdd() {
-        if (currentNumber === '') return;
-        
-        // Normalize to 3-digit string for consistent keys
-        const numKey = currentNumber.padStart(3, '0');
-        
-        // Check if already exists
-        if (packages[numKey]) {
-            // Same zone? Just ignore
-            if (packages[numKey] === selectedZone) {
-                haptic('error');
-                showToast(`#${numKey} already in ${zones[selectedZone].name}`);
+
+    function handleZone(zone) {
+        if (!currentNumber) return;
+        const key = normalizeKey(currentNumber);
+        if (packages[key]) {
+            if (packages[key] === zone) {
+                Audio.error(); haptic('error');
+                showToast(`#${formatNumber(key)} already in ${zones[zone]}`, true);
                 currentNumber = '';
                 render();
                 return;
             }
-            // Different zone - show confirmation modal
-            pendingNumber = numKey;
-            pendingZone = selectedZone;
+            pendingMove = { key, zone };
             showConfirmModal();
             return;
         }
-        
-        // Add new package
-        addPackage(numKey, selectedZone);
+        addPackage(key, zone);
     }
-    
-    function addPackage(num, zone) {
-        packages[num] = zone;
-        haptic('success');
-        playSound(880);
-        showToast(`#${formatNumber(num)} → ${zones[zone].name}`);
+
+    function addPackage(key, zone) {
+        packages[key] = zone;
+        delivered = delivered.filter(n => n !== key);
+        Audio.success(); haptic('success');
+        showToast(`#${formatNumber(key)} → ${zones[zone]}`);
         currentNumber = '';
-        saveState();
+        save();
         render();
     }
-    
-    function selectZone(zone) {
-        haptic('light');
-        selectedZone = zone;
-        render();
-    }
-    
-    // ============ CONFIRMATION MODAL ============
-    
+
+    // Modal
     function showConfirmModal() {
-        const overlay = document.getElementById('confirmOverlay');
-        document.getElementById('confirmNumber').textContent = formatNumber(pendingNumber);
-        document.getElementById('confirmCurrentZone').textContent = zones[packages[pendingNumber]].name;
-        document.getElementById('confirmNewZone').textContent = zones[pendingZone].name;
-        overlay.classList.add('active');
+        document.getElementById('modalNumber').textContent = formatNumber(pendingMove.key);
+        document.getElementById('modalCurrentZone').textContent = zones[packages[pendingMove.key]];
+        document.getElementById('modalNewZone').textContent = zones[pendingMove.zone];
+        document.getElementById('confirmModal').classList.add('active');
     }
-    
+
     function hideConfirmModal() {
-        document.getElementById('confirmOverlay').classList.remove('active');
-        pendingNumber = null;
-        pendingZone = null;
+        document.getElementById('confirmModal').classList.remove('active');
+        pendingMove = null;
     }
-    
-    function confirmMove() {
-        if (pendingNumber && pendingZone) {
-            // Remove from delivered if it was there
-            delivered = delivered.filter(n => n !== pendingNumber);
-            packages[pendingNumber] = pendingZone;
-            haptic('success');
-            playSound(880);
-            showToast(`#${formatNumber(pendingNumber)} → ${zones[pendingZone].name}`);
+
+    document.getElementById('modalConfirm').addEventListener('click', () => {
+        if (pendingMove) {
+            Audio.success(); haptic('success');
+            packages[pendingMove.key] = pendingMove.zone;
+            delivered = delivered.filter(n => n !== pendingMove.key);
+            showToast(`#${formatNumber(pendingMove.key)} → ${zones[pendingMove.zone]}`);
             currentNumber = '';
-            saveState();
+            save();
         }
         hideConfirmModal();
         render();
-    }
-    
-    function confirmCancel() {
-        haptic('light');
+    });
+
+    document.getElementById('modalCancel').addEventListener('click', () => {
+        Audio.keyClick(); haptic('light');
         currentNumber = '';
         hideConfirmModal();
         render();
+    });
+
+    // Delivery Mode
+    function togglePackage(key) {
+        Audio.tap(); haptic('light');
+        if (selectedPackages.includes(key)) {
+            selectedPackages = selectedPackages.filter(k => k !== key);
+        } else {
+            selectedPackages.push(key);
+        }
+        render();
     }
-    
-    // Attach confirmation listeners
-    document.getElementById('confirmMove').addEventListener('click', confirmMove);
-    document.getElementById('confirmCancel').addEventListener('click', confirmCancel);
-    
-    // ============ RENDER ============
-    
+
+    function markDelivered() {
+        Audio.delivered(); haptic('success');
+        selectedPackages.forEach(key => {
+            if (!delivered.includes(key)) delivered.push(key);
+        });
+        showToast(`${selectedPackages.length} delivered!`);
+        selectedPackages = [];
+        save();
+        render();
+    }
+
+    function moveSelectedTo(zone) {
+        Audio.success(); haptic('success');
+        selectedPackages.forEach(key => { packages[key] = zone; });
+        showToast(`${selectedPackages.length} → ${zones[zone]}`);
+        selectedPackages = [];
+        save();
+        render();
+    }
+
+    function clearSelection() {
+        Audio.keyClick(); haptic('light');
+        selectedPackages = [];
+        render();
+    }
+
+    // Quick Add
+    function showQuickAdd() {
+        Audio.keyClick(); haptic('light');
+        quickAddNumber = '';
+        document.getElementById('quickAddOverlay').classList.add('active');
+        renderQuickAdd();
+    }
+
+    function hideQuickAdd() {
+        document.getElementById('quickAddOverlay').classList.remove('active');
+    }
+
+    function renderQuickAdd() {
+        const c = document.getElementById('quickAddContent');
+        const exists = quickAddNumber && packages[normalizeKey(quickAddNumber)];
+        const displayNum = quickAddNumber ? formatNumber(quickAddNumber) : '--';
+
+        c.innerHTML = `
+            <div class="number-display">
+                <div class="current-number ${quickAddNumber ? (exists ? 'exists' : '') : 'empty'}">${displayNum}</div>
+                <div class="number-hint ${exists ? 'exists' : ''}">${exists ? `Already in ${zones[packages[normalizeKey(quickAddNumber)]]}` : (quickAddNumber ? 'Select zone' : 'Enter number')}</div>
+            </div>
+            <div class="numpad">
+                ${[1,2,3,4,5,6,7,8,9].map(d => `<button class="numpad-btn" data-qa="${d}">${d}</button>`).join('')}
+                <button class="numpad-btn clear" data-qa-clear>C</button>
+                <button class="numpad-btn" data-qa="0">0</button>
+                <button class="numpad-btn backspace" data-qa-back>⌫</button>
+            </div>
+            <div class="zone-buttons">
+                ${Object.entries(zones).map(([k, n]) => `<button class="zone-btn ${!quickAddNumber ? 'disabled' : ''}" data-qa-zone="${k}">${n}</button>`).join('')}
+            </div>
+        `;
+
+        c.querySelectorAll('[data-qa]').forEach(b => {
+            b.addEventListener('click', () => {
+                Audio.keyClick(); haptic('light');
+                if (quickAddNumber.length < 3) quickAddNumber += b.dataset.qa;
+                else quickAddNumber = b.dataset.qa;
+                renderQuickAdd();
+            });
+        });
+
+        c.querySelector('[data-qa-clear]')?.addEventListener('click', () => {
+            Audio.keyClick(); haptic('light');
+            quickAddNumber = '';
+            renderQuickAdd();
+        });
+
+        c.querySelector('[data-qa-back]')?.addEventListener('click', () => {
+            Audio.keyClick(); haptic('light');
+            quickAddNumber = quickAddNumber.slice(0, -1);
+            renderQuickAdd();
+        });
+
+        c.querySelectorAll('[data-qa-zone]').forEach(b => {
+            b.addEventListener('click', () => {
+                if (!quickAddNumber) return;
+                const zone = b.dataset.qaZone;
+                const key = normalizeKey(quickAddNumber);
+                if (packages[key] && packages[key] === zone) {
+                    Audio.error(); haptic('error');
+                    showToast(`#${formatNumber(key)} already in ${zones[zone]}`, true);
+                } else {
+                    packages[key] = zone;
+                    delivered = delivered.filter(n => n !== key);
+                    Audio.success(); haptic('success');
+                    showToast(`#${formatNumber(key)} → ${zones[zone]}`);
+                    save();
+                }
+                quickAddNumber = '';
+                renderQuickAdd();
+                render();
+            });
+        });
+    }
+
+    document.getElementById('quickAddClose').addEventListener('click', hideQuickAdd);
+
+    // Render
     function render() {
         const app = document.getElementById('app');
-        
-        if (view === 'delivery') {
-            app.innerHTML = renderDeliveryView();
-        } else {
-            app.innerHTML = renderEntryView();
-        }
-        
+        app.innerHTML = view === 'delivery' ? renderDelivery() : renderLoading();
         attachListeners();
     }
-    
-    function renderEntryView() {
-        const total = getTotalPackages();
-        const normalizedNum = currentNumber ? currentNumber.padStart(3, '0') : '';
-        const exists = normalizedNum && packages[normalizedNum];
-        const displayNum = currentNumber ? formatNumber(currentNumber) : '---';
-        
+
+    function renderLoading() {
+        const exists = currentNumber && packages[normalizeKey(currentNumber)];
+        const displayNum = currentNumber ? formatNumber(currentNumber) : '--';
+
         return `
             <div class="app">
                 <div class="header">
-                    <div class="header-row">
-                        <div class="logo">
-                            <span class="logo-icon">📦</span>
-                            <span class="logo-text">Flex<span>Runner</span></span>
-                        </div>
-                        <div class="header-actions">
-                            <div class="header-stat">${total} loaded</div>
-                            <button class="icon-btn" id="darkModeBtn">${darkMode ? '☀️' : '🌙'}</button>
-                        </div>
+                    <div class="logo">Flex<span>Runner</span></div>
+                    <div class="zone-counts">
+                        <div class="zone-count"><span class="zone-count-num">${getZoneCount('front')}</span>Front</div>
+                        <div class="zone-count"><span class="zone-count-num">${getZoneCount('back')}</span>Back</div>
+                        <div class="zone-count"><span class="zone-count-num">${getZoneCount('trunk')}</span>Trunk</div>
                     </div>
                 </div>
-                
-                <div class="entry-screen">
-                    <div class="number-display">
-                        <div class="current-number ${currentNumber ? (exists ? 'exists' : '') : 'empty'}">${displayNum}</div>
-                        <div class="number-hint ${exists ? 'exists' : ''}">
-                            ${exists ? `Already in ${zones[packages[normalizedNum]].name}` : (currentNumber ? `Add to ${zones[selectedZone].name}` : 'Enter package number')}
-                        </div>
-                    </div>
-                    
-                    <div class="zone-quick-select">
-                        ${Object.entries(zones).map(([key, zone]) => `
-                            <button class="zone-quick-btn ${zone.class} ${selectedZone === key ? 'active' : ''}" data-zone="${key}">
-                                <span class="zone-icon">${zone.icon}</span>
-                                <span class="zone-name">${zone.name}</span>
-                                <span class="zone-count">${getZoneCount(key)}</span>
-                            </button>
-                        `).join('')}
-                    </div>
-                    
-                    <div class="numpad">
-                        <div class="numpad-row">
-                            <button class="numpad-btn digit" data-digit="1">1</button>
-                            <button class="numpad-btn digit" data-digit="2">2</button>
-                            <button class="numpad-btn digit" data-digit="3">3</button>
-                        </div>
-                        <div class="numpad-row">
-                            <button class="numpad-btn digit" data-digit="4">4</button>
-                            <button class="numpad-btn digit" data-digit="5">5</button>
-                            <button class="numpad-btn digit" data-digit="6">6</button>
-                        </div>
-                        <div class="numpad-row">
-                            <button class="numpad-btn digit" data-digit="7">7</button>
-                            <button class="numpad-btn digit" data-digit="8">8</button>
-                            <button class="numpad-btn digit" data-digit="9">9</button>
-                        </div>
-                        <div class="numpad-row">
-                            <button class="numpad-btn action clear" id="clearBtn">C</button>
-                            <button class="numpad-btn digit" data-digit="0">0</button>
-                            <button class="numpad-btn add ${currentNumber ? '' : 'disabled'}" id="addBtn">✓</button>
-                        </div>
-                    </div>
+                <div class="number-display">
+                    <div class="current-number ${currentNumber ? (exists ? 'exists' : '') : 'empty'}">${displayNum}</div>
+                    <div class="number-hint ${exists ? 'exists' : ''}">${exists ? `Already in ${zones[packages[normalizeKey(currentNumber)]]}` : (currentNumber ? 'Select zone' : 'Enter package number')}</div>
                 </div>
-                
-                <div class="bottom-bar">
-                    <div class="btn-row">
-                        <button class="btn btn-secondary" id="summaryBtn">📋 Summary</button>
-                        <button class="btn btn-primary" id="deliveryBtn" ${total === 0 ? 'disabled' : ''}>🚚 Deliver</button>
-                    </div>
+                <div class="numpad">
+                    ${[1,2,3,4,5,6,7,8,9].map(d => `<button class="numpad-btn" data-digit="${d}">${d}</button>`).join('')}
+                    <button class="numpad-btn clear" data-clear>C</button>
+                    <button class="numpad-btn" data-digit="0">0</button>
+                    <button class="numpad-btn backspace" data-back>⌫</button>
                 </div>
-            </div>
-            ${renderSummaryModal()}
-        `;
-    }
-    
-    function renderSummaryModal() {
-        return `
-            <div class="modal-overlay ${showSummary ? 'active' : ''}" id="summaryModal">
-                <div class="modal">
-                    <div class="modal-header">
-                        <h2 class="modal-title">📋 Load Summary</h2>
-                        <button class="modal-close" id="closeSummary">✕</button>
-                    </div>
-                    <div class="modal-body">
-                        ${Object.entries(zones).map(([key, zone]) => {
-                            const zp = Object.entries(packages)
-                                .filter(([num, z]) => z === key && !delivered.includes(num))
-                                .map(([num]) => num)
-                                .sort((a, b) => Number(a) - Number(b));
-                            return `
-                                <div class="zone-section">
-                                    <div class="zone-header ${zone.class}">
-                                        <span>${zone.icon} ${zone.name}</span>
-                                        <span class="zone-count">${zp.length}</span>
-                                    </div>
-                                    <div class="package-list">
-                                        ${zp.length > 0 ? zp.map(num => `
-                                            <div class="package-chip">
-                                                ${formatNumber(num)}
-                                                <button data-remove="${num}">✕</button>
-                                            </div>
-                                        `).join('') : '<span class="empty-zone">Empty</span>'}
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                        <button class="btn btn-danger" id="clearAllBtn" style="width:100%; margin-top:1.25rem;">🗑️ Clear All</button>
-                    </div>
+                <div class="zone-buttons">
+                    ${Object.entries(zones).map(([k, n]) => `<button class="zone-btn ${!currentNumber ? 'disabled' : ''}" data-zone="${k}">${n}</button>`).join('')}
+                </div>
+                <div class="bottom-cta">
+                    <button class="cta-btn" id="startBtn" ${getTotalRemaining() === 0 ? 'disabled' : ''}>🚚 Deliver (${getTotalRemaining()})</button>
                 </div>
             </div>
         `;
     }
-    
-    function renderDeliveryView() {
-        const totalDelivered = delivered.length;
-        const totalRemaining = getTotalPackages();
-        const allDone = totalRemaining === 0 && Object.keys(packages).length > 0;
-        
+
+    function renderDelivery() {
+        const totalD = getTotalDelivered();
+        const totalR = getTotalRemaining();
+        const allDone = totalR === 0 && Object.keys(packages).length > 0;
+        const zp = getZonePackages(activeZone); // Only undelivered
+        const hasSel = selectedPackages.length > 0;
+
         return `
-            <div class="app">
-                <div class="header">
-                    <div class="header-row">
-                        <div class="logo">
-                            <span class="logo-icon">🚚</span>
-                            <span class="logo-text">Deliver<span>ing</span></span>
-                        </div>
-                        <div class="header-actions">
-                            <button class="icon-btn" id="darkModeBtn">${darkMode ? '☀️' : '🌙'}</button>
-                            <button class="btn btn-secondary btn-small" id="backBtn">← Back</button>
-                        </div>
-                    </div>
+            <div class="delivery-app">
+                <div class="delivery-header">
+                    <div class="delivery-title">Deliver<span>ing</span></div>
+                    <button class="back-btn" id="backBtn">← Back</button>
                 </div>
-                
-                <div class="content">
-                    <div class="delivery-stats">
-                        <div class="delivery-stat done">
-                            <div class="delivery-stat-value">${totalDelivered}</div>
-                            <div class="delivery-stat-label">Delivered</div>
-                        </div>
-                        <div class="delivery-stat remaining">
-                            <div class="delivery-stat-value">${totalRemaining}</div>
-                            <div class="delivery-stat-label">Remaining</div>
-                        </div>
-                    </div>
-                    
+                <div class="delivery-stats">
+                    <div class="stat-box delivered"><div class="stat-value">${totalD}</div><div class="stat-label">Delivered</div></div>
+                    <div class="stat-box remaining"><div class="stat-value">${totalR}</div><div class="stat-label">Remaining</div></div>
+                </div>
+                <div class="zone-tabs">
+                    ${Object.entries(zones).map(([k, n]) => {
+                        const cnt = getZoneCount(k);
+                        return `<button class="zone-tab ${activeZone === k ? 'active' : ''}" data-tab="${k}"><span class="tab-count">${cnt}</span>${n}</button>`;
+                    }).join('')}
+                </div>
+                <div class="package-list-container">
                     ${allDone ? `
                         <div class="celebration">
                             <div class="celebration-emoji">🎉</div>
-                            <div class="celebration-text">Route Complete!</div>
-                            <div class="celebration-sub">All packages delivered</div>
+                            <div class="celebration-text">All Done!</div>
+                            <div class="celebration-sub">Route complete</div>
                         </div>
                     ` : `
-                        ${Object.entries(zones).map(([key, zone]) => {
-                            const zp = Object.entries(packages)
-                                .filter(([num, z]) => z === key)
-                                .map(([num]) => num)
-                                .sort((a, b) => Number(a) - Number(b));
-                            if (zp.length === 0) return '';
-                            const remaining = zp.filter(n => !delivered.includes(n)).length;
-                            return `
-                                <div class="delivery-zone">
-                                    <div class="delivery-zone-header ${zone.class}">
-                                        <span class="delivery-zone-title">${zone.icon} ${zone.name}</span>
-                                        <span class="delivery-zone-count">${remaining} left</span>
-                                    </div>
-                                    <div class="delivery-packages">
-                                        ${zp.map(num => `
-                                            <div class="delivery-chip ${delivered.includes(num) ? 'delivered' : ''}" data-deliver="${num}">
-                                                ${formatNumber(num)}
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
+                        <div class="package-list">
+                            ${zp.length === 0 ? `<div class="empty-zone">No packages in ${zones[activeZone]}</div>` : 
+                                zp.map(key => `<div class="package-chip ${selectedPackages.includes(key) ? 'selected' : ''}" data-pkg="${key}">${formatNumber(key)}</div>`).join('')
+                            }
+                        </div>
                     `}
                 </div>
-                
-                <div class="bottom-bar">
-                    <div class="btn-row">
-                        <button class="btn btn-danger" id="resetDeliveryBtn">↺ Reset</button>
+                <div class="selection-bar ${hasSel ? 'active' : ''}">
+                    <div class="selection-info"><strong>${selectedPackages.length}</strong> selected</div>
+                    <div class="selection-actions">
+                        <button class="selection-btn move" data-move="front">Front</button>
+                        <button class="selection-btn move" data-move="back">Back</button>
+                        <button class="selection-btn move" data-move="trunk">Trunk</button>
+                        <button class="selection-btn deliver" id="deliverBtn">✓</button>
+                        <button class="selection-btn cancel" id="cancelBtn">✕</button>
+                    </div>
+                </div>
+                <div class="delivery-bottom" ${hasSel ? 'style="display:none"' : ''}>
+                    <div class="delivery-actions">
+                        <button class="delivery-btn add" id="addBtn">+ Add</button>
+                        <button class="delivery-btn reset" id="resetBtn">Reset</button>
                     </div>
                 </div>
             </div>
         `;
     }
-    
+
     function attachListeners() {
-        // Dark mode
-        document.querySelectorAll('#darkModeBtn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                haptic('light');
-                darkMode = !darkMode;
-                applyDarkMode();
-                saveState();
-                render();
-            });
-        });
-        
-        // Numpad digits
-        document.querySelectorAll('.numpad-btn.digit').forEach(btn => {
-            btn.addEventListener('click', () => handleDigit(btn.dataset.digit));
-        });
-        
-        // Clear
-        document.getElementById('clearBtn')?.addEventListener('click', handleClear);
-        
-        // Add
-        document.getElementById('addBtn')?.addEventListener('click', handleAdd);
-        
-        // Zone selection
-        document.querySelectorAll('.zone-quick-btn').forEach(btn => {
-            btn.addEventListener('click', () => selectZone(btn.dataset.zone));
-        });
-        
-        // Summary
-        document.getElementById('summaryBtn')?.addEventListener('click', () => {
-            haptic('light');
-            showSummary = true;
-            render();
-        });
-        
-        document.getElementById('closeSummary')?.addEventListener('click', () => {
-            haptic('light');
-            showSummary = false;
-            render();
-        });
-        
-        document.getElementById('summaryModal')?.addEventListener('click', (e) => {
-            if (e.target.id === 'summaryModal') {
-                showSummary = false;
-                render();
-            }
-        });
-        
-        // Remove package
-        document.querySelectorAll('[data-remove]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                haptic('medium');
-                const num = btn.dataset.remove;
-                delete packages[num];
-                delivered = delivered.filter(n => n !== num);
-                saveState();
-                showToast(`Removed #${formatNumber(num)}`);
-                render();
-            });
-        });
-        
-        // Clear all
-        document.getElementById('clearAllBtn')?.addEventListener('click', () => {
-            if (confirm('Clear all packages?')) {
-                haptic('medium');
-                packages = {};
-                delivered = [];
-                showSummary = false;
-                saveState();
-                render();
-            }
-        });
-        
-        // Delivery mode
-        document.getElementById('deliveryBtn')?.addEventListener('click', () => {
-            if (getTotalPackages() === 0) return;
-            haptic('success');
+        // Loading
+        document.querySelectorAll('[data-digit]').forEach(b => b.addEventListener('click', () => handleDigit(b.dataset.digit)));
+        document.querySelector('[data-clear]')?.addEventListener('click', handleClear);
+        document.querySelector('[data-back]')?.addEventListener('click', handleBackspace);
+        document.querySelectorAll('[data-zone]').forEach(b => b.addEventListener('click', () => handleZone(b.dataset.zone)));
+        document.getElementById('startBtn')?.addEventListener('click', () => {
+            if (getTotalRemaining() === 0) return;
+            Audio.tap(); haptic('medium');
             view = 'delivery';
+            selectedPackages = [];
             render();
         });
-        
-        // Back from delivery
+
+        // Delivery
         document.getElementById('backBtn')?.addEventListener('click', () => {
-            haptic('light');
-            view = 'entry';
+            Audio.keyClick(); haptic('light');
+            view = 'loading';
+            selectedPackages = [];
             render();
         });
-        
-        // Deliver package
-        document.querySelectorAll('[data-deliver]').forEach(chip => {
-            chip.addEventListener('click', () => {
-                const num = chip.dataset.deliver;
-                haptic('success');
-                if (delivered.includes(num)) {
-                    delivered = delivered.filter(n => n !== num);
-                } else {
-                    delivered.push(num);
-                    playSound(660, 0.1);
-                }
-                saveState();
-                render();
-            });
-        });
-        
-        // Reset delivery
-        document.getElementById('resetDeliveryBtn')?.addEventListener('click', () => {
-            if (confirm('Reset delivery progress?')) {
-                haptic('medium');
+
+        document.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', () => {
+            Audio.tap(); haptic('light');
+            activeZone = b.dataset.tab;
+            selectedPackages = [];
+            render();
+        }));
+
+        document.querySelectorAll('[data-pkg]').forEach(c => c.addEventListener('click', () => togglePackage(c.dataset.pkg)));
+        document.querySelectorAll('[data-move]').forEach(b => b.addEventListener('click', () => moveSelectedTo(b.dataset.move)));
+        document.getElementById('deliverBtn')?.addEventListener('click', markDelivered);
+        document.getElementById('cancelBtn')?.addEventListener('click', clearSelection);
+        document.getElementById('addBtn')?.addEventListener('click', showQuickAdd);
+        document.getElementById('resetBtn')?.addEventListener('click', () => {
+            if (confirm('Reset all delivery progress?')) {
+                Audio.keyClick(); haptic('medium');
                 delivered = [];
-                saveState();
+                save();
                 render();
             }
         });
     }
-    
-    // Initial render
+
     render();
 </script>
 ```
